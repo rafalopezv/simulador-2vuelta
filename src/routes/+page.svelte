@@ -1,7 +1,7 @@
 <script>
 	import HeaderTermometro from '$lib/components/HeaderTermometro.svelte';
 	import BarPanel from '$lib/components/BarPanel.svelte';
-	import SidebarPanel from '$lib/components/SidebarPanel.svelte';
+	import SidebarPanel from '$lib/components/SideBarPanel.svelte';
 	let showDrawer = false;
 </script>
 
