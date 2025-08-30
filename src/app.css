@@ -1,0 +1,8 @@
+@import 'tailwindcss';
+@plugin '@tailwindcss/forms';
+@plugin '@tailwindcss/typography';
+
+/* Define la familia mono a Roboto Mono (v4) */
+@theme {
+	--font-mono: 'Roboto Mono', monospace;
+}
