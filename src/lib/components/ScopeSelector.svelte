@@ -1,18 +1,25 @@
 <script>
+	import MinimalSelect from '$lib/components/MinimalSelect.svelte';
 	import {
-		ambito,
+		ambito, // store
 		nodoSeleccionado,
 		nodosExterior,
 		nodosNacional,
 		capitales
 	} from '$lib/stores/sim';
 
-	const ambitos = [
-		{ key: 'MUNDIAL', label: 'Mundial' },
-		{ key: 'EXTERIOR', label: 'Exterior' },
-		{ key: 'NACIONAL', label: 'Nacional' },
-		{ key: 'CAPITALES', label: 'C. Capitales' }
+	const opciones = [
+		{ label: 'Mundial', value: 'MUNDIAL' },
+		{ label: 'Exterior', value: 'EXTERIOR' },
+		{ label: 'Nacional', value: 'NACIONAL' },
+		{ label: 'C. Capitales', value: 'CAPITALES' }
 	];
+
+	function onChange(e) {
+		// actualiza el store
+		$ambito = e.detail.value;
+		$nodoSeleccionado = 'Total';
+	}
 
 	const labelDropdown = (a) =>
 		a === 'EXTERIOR'
@@ -23,60 +30,89 @@
 					? 'Ciudad capital'
 					: 'Nodo';
 
-	const cityOption = (c) => `${c.ciudad} (${c.dpto})`;
+	const cityOption = (c) => ({
+		value: `${c.ciudad} (${c.dpto})`,
+		label: `${c.ciudad} (${c.dpto})`
+	});
 
-	function setAmbito(a) {
-		$ambito = a;
+	$: itemsNodos =
+		$ambito === 'EXTERIOR'
+			? [{ value: 'Total', label: 'Total' }, ...nodosExterior.map((n) => ({ value: n, label: n }))]
+			: $ambito === 'NACIONAL'
+				? [
+						{ value: 'Total', label: 'Total' },
+						...nodosNacional.map((n) => ({ value: n, label: n }))
+					]
+				: $ambito === 'CAPITALES'
+					? [{ value: 'Total', label: 'Total' }, ...capitales.map(cityOption)]
+					: [{ value: 'Total', label: 'Total' }];
+
+	function setAmbito(val) {
+		$ambito = val;
 		$nodoSeleccionado = 'Total';
 	}
-	const isMundial = () => $ambito === 'MUNDIAL';
 </script>
 
-<div class="space-y-3">
-	<p class="text-11 mb-2 pb-2 font-semibold text-gray-900">
-		Define qué lugar de la votaicón quieres ajustar
-	</p>
-	<!-- Ámbitos 2x2 -->
-	<div class="grid grid-cols-2 gap-2 pb-2">
-		{#each ambitos as a}
-			<button
-				on:click={() => setAmbito(a.key)}
-				class="rounded-lg px-3 py-2 text-sm font-medium transition
-                 {$ambito === a.key
-					? 'bg-gray-900 text-white'
-					: 'bg-gray-100 text-gray-800 hover:bg-gray-200'}"
+<!-- Etiqueta -->
+<div class="mb-3 w-full text-center">
+	<p class="text-sm font-medium text-gray-700 sm:text-base">Reasignar votos desde:</p>
+</div>
+
+<div class="space-y-2">
+	<!-- Ámbito -->
+	<div>
+		<label class="mb-1 block text-[11px] text-gray-600 sm:text-xs">Ámbito</label>
+
+		<!-- Desktop: custom -->
+		<div class="hidden sm:block">
+			<MinimalSelect
+				items={opciones}
+				bind:selected={$ambito}
+				placeholder="Seleccionar ámbito"
+				on:change={onChange}
+			/>
+		</div>
+
+		<!-- Mobile: nativo -->
+		<div class="relative sm:hidden">
+			<select
+				bind:value={$ambito}
+				on:change={(e) => setAmbito(e.target.value)}
+				class="w-full appearance-none rounded-lg bg-gray-100 px-3 py-2 pr-8 text-xs
+                 text-gray-900 transition hover:bg-gray-200 focus:ring-2 focus:ring-gray-900 focus:outline-none"
 			>
-				{a.label}
-			</button>
-		{/each}
+				{#each opciones as a}<option value={a.value}>{a.label}</option>{/each}
+			</select>
+			<span class="pointer-events-none absolute right-2 bottom-2 text-gray-500">▾</span>
+		</div>
 	</div>
 
-	<!-- Dropdown dependiente -->
-	<div class="flex items-center gap-2 pb-2">
-		<span class="text-xs text-gray-600">{labelDropdown($ambito)}:</span>
-		<div class="relative">
+	<!-- Nodo -->
+	<div>
+		<label class="mb-1 block text-[11px] text-gray-600 sm:text-xs">{labelDropdown($ambito)}</label>
+
+		<!-- Desktop: custom -->
+		<div class="hidden sm:block">
+			<MinimalSelect
+				items={itemsNodos}
+				bind:selected={$nodoSeleccionado}
+				placeholder="Selecciona nodo"
+				disabled={$ambito === 'MUNDIAL'}
+			/>
+		</div>
+
+		<!-- Mobile: nativo -->
+		<div class="relative sm:hidden">
 			<select
 				bind:value={$nodoSeleccionado}
-				class="w-48 appearance-none rounded-lg border border-gray-300 bg-white px-2
-                 py-1.5 pr-6 text-sm shadow-sm focus:ring-2 focus:ring-gray-900 focus:outline-none disabled:cursor-not-allowed
-                 disabled:opacity-50 sm:w-56"
-				disabled={isMundial()}
+				disabled={$ambito === 'MUNDIAL'}
+				class="w-full appearance-none rounded-lg bg-gray-100 px-3 py-2 pr-8 text-xs
+                 text-gray-900 transition hover:bg-gray-200 focus:ring-2 focus:ring-gray-900 focus:outline-none
+                 disabled:cursor-not-allowed disabled:opacity-60"
 			>
-				<option value="Total">Total</option>
-
-				{#if $ambito === 'EXTERIOR'}
-					{#each nodosExterior as n}<option value={n}>{n}</option>{/each}
-				{:else if $ambito === 'NACIONAL'}
-					{#each nodosNacional as n}<option value={n}>{n}</option>{/each}
-				{:else if $ambito === 'CAPITALES'}
-					{#each capitales as c}
-						<option value={cityOption(c)}>{cityOption(c)}</option>
-					{/each}
-				{/if}
+				{#each itemsNodos as it}<option value={it.value}>{it.label}</option>{/each}
 			</select>
-			<div class="pointer-events-none absolute inset-y-0 right-2 flex items-center text-gray-500">
-				▾
-			</div>
+			<span class="pointer-events-none absolute right-2 bottom-2 text-gray-500">▾</span>
 		</div>
 	</div>
 </div>

@@ -5,15 +5,14 @@
 		nulo,
 		kpis,
 		emitidos,
-		rebalanceToDestino,
-		recomputeAll,
 		destinoGlobal,
+		recomputeAll,
 		FINALISTA_A_ID,
 		FINALISTA_B_ID
-	} from '$lib/stores/sim';
+	} from '$lib/stores/nuevo';
 	import PartyBar from './Partido.svelte';
 
-	const nf = new Intl.NumberFormat('es-BO');
+	const nf = new Intl.NumberFormat('en-US');
 	const labelW = '7rem';
 
 	// datos reactivos
@@ -26,18 +25,66 @@
 	const step = 500000;
 	$: ticks = Array.from({ length: Math.floor(axisMax / step) + 1 }, (_, i) => i * step);
 
-	// — handlers —
-	function onDragPartido(e) {
-		const { name, votos } = e.detail;
-		partidos.update((arr) => arr.map((p) => (p.name === name ? { ...p, votos } : p)));
-		recomputeAll(); // 🔴 recalcula KPIs/termómetro en vivo
-	}
-	function onChangePartido(e) {
-		const { name, votos } = e.detail;
-		partidos.update((arr) => arr.map((p) => (p.name === name ? { ...p, votos } : p)));
-		recomputeAll(); // por si acaso, confirma al soltar
+	// — helpers —
+	function transferToDestino(next, amount) {
+		// amount > 0  => agregar a destino
+		// amount < 0  => quitar del destino
+		const dest = $destinoGlobal; // 'A' | 'B' | 'NULO'
+
+		const apply = (id, delta) => {
+			const j = next.findIndex((p) => p.id === id);
+			if (j === -1) return;
+			const cur = next[j].votos || 0;
+			// no dejar en negativo
+			next[j].votos = Math.max(0, cur + delta);
+		};
+
+		if (dest === 'A') {
+			apply(FINALISTA_A_ID, amount);
+		} else if (dest === 'B') {
+			apply(FINALISTA_B_ID, amount);
+		} else {
+			// 'NULO' => repartir entre PDC y LIBRE
+			apply(FINALISTA_A_ID, amount / 2);
+			apply(FINALISTA_B_ID, amount / 2);
+		}
 	}
 
+	// — handlers para partidos (NO nulo) —
+	function onDragPartido(e) {
+		const { name, votos: newV } = e.detail;
+
+		partidos.update((arr) => {
+			const next = arr.map((p) => ({ ...p }));
+			const i = next.findIndex((p) => p.name === name);
+			if (i === -1) return arr;
+
+			const prevV = next[i].votos || 0;
+			const delta = newV - prevV; // si es negativo, estamos quitando a ese partido
+
+			if (delta === 0) return arr;
+
+			// 1) actualiza el partido arrastrado
+			next[i].votos = newV;
+
+			// 2) mueve el delta al destino (pero SIN tocar válidos totales)
+			//    - si delta < 0 ⇒ quitamos al partido ⇒ sumamos (+|delta|) al destino
+			//    - si delta > 0 ⇒ estamos añadiendo al partido ⇒ restamos esa masa desde el destino
+			transferToDestino(next, -delta);
+
+			return next;
+		});
+
+		// Recalcular pcts/KPIs/termómetro en vivo
+		recomputeAll();
+	}
+
+	function onChangePartido(e) {
+		// por si acaso (normalmente ya estamos recalculando en onDragPartido)
+		recomputeAll();
+	}
+
+	// — Nulo: sí cambia válidos —
 	function onDragNulo(e) {
 		const emi = $emitidos || 0;
 		const bl = $blanco?.votos || 0;
@@ -47,45 +94,29 @@
 		const raw = e.detail.votos || 0;
 		const v = Math.max(minNulo, Math.min(raw, nuBase));
 
-		// 1) Update nulo store synchronously
+		// 1) update nulo
 		nulo.set({ ...$nulo, votos: v, pct: emi ? (100 * v) / emi : 0 });
 
-		// 2) Compute shortage
+		// 2) shortage para cuadrar identidad (válidos = emi - bl - nulo)
 		const validTarget = Math.max(0, emi - bl - v);
 		const currentSum = ($partidos || []).reduce((s, p) => s + (p.votos || 0), 0);
 		const shortage = validTarget - currentSum;
 
-		// 3) Update target party based on destinoGlobal
-		const dest = $destinoGlobal; // 'A' | 'B' | 'NULO'
-		const targetId = dest === 'A' ? FINALISTA_A_ID : dest === 'B' ? FINALISTA_B_ID : null;
-
+		// 3) mover shortage al destino (A/B/mitad), finalistas pueden crecer
 		partidos.update((arr) => {
-			const safeValid = validTarget || 1; // Avoid division by zero
-			return arr.map((p) => {
-				if (targetId && p.id === targetId) {
-					const max = Number.POSITIVE_INFINITY; // Finalists can exceed baseline
-					const min = 0;
-					const newVotos = Math.max(min, Math.min((p.votos || 0) + shortage, max));
-					return { ...p, votos: newVotos, pct: (100 * newVotos) / safeValid };
-				} else if (dest === 'NULO' && (p.id === FINALISTA_A_ID || p.id === FINALISTA_B_ID)) {
-					const halfShortage = shortage / 2;
-					const max = Number.POSITIVE_INFINITY;
-					const min = 0;
-					const newVotos = Math.max(min, Math.min((p.votos || 0) + halfShortage, max));
-					return { ...p, votos: newVotos, pct: (100 * newVotos) / safeValid };
-				}
-				return p; // Keep pct unchanged for non-target parties during drag
-			});
+			const next = arr.map((p) => ({ ...p }));
+			transferToDestino(next, shortage);
+			return next;
 		});
+
+		recomputeAll();
 	}
 
 	function onChangeNulo(e) {
-		onDragNulo(e); // Apply same logic
-		recomputeAll(); // Recalculate percentages and KPIs on drag end
+		onDragNulo(e);
 	}
 </script>
 
-<!-- Same markup as before -->
 <section class="w-full px-2 sm:px-4">
 	<div class="rounded-xl border-gray-200 bg-white p-2.5 shadow-sm sm:p-3">
 		<h3 class="mb-4 text-center text-base font-semibold text-gray-900 sm:text-lg">
@@ -93,23 +124,20 @@
 		</h3>
 
 		<div class="relative" style="--label-w: {labelW};">
-			<!-- grid del eje -->
-			<div
-				class="pointer-events-none absolute inset-0 z-0"
-				style="left: calc({labelW} + 0.75rem); "
-			>
+			<!-- grid del eje detrás de las barras -->
+			<div class="pointer-events-none absolute inset-0 z-0" style="left: calc({labelW} + 0.75rem);">
 				<div class="relative h-full">
 					{#each ticks as t}
 						<div
 							class="absolute top-0 bottom-0 border-l border-solid border-gray-200"
-							style="left: {(t / axisMax) * 100}%; z-index: 5;"
+							style="left: {(t / axisMax) * 100}%;"
 						></div>
 					{/each}
 				</div>
 			</div>
 
 			<!-- barras -->
-			<div class="space-y-1.5 sm:space-y-2">
+			<div class="relative z-10 space-y-1.5 sm:space-y-2">
 				{#each partidosArr as p, i}
 					<PartyBar
 						name={p.name}
@@ -147,6 +175,7 @@
 						on:update={onDragNulo}
 						on:commit={onChangeNulo}
 					/>
+
 					<PartyBar
 						name="Blanco (fijo)"
 						color="#CBD5E1"
@@ -165,15 +194,15 @@
 				<div class="relative h-4" style="margin-left: 0.75rem;">
 					{#each ticks as t, i}
 						<span
-							class="absolute font-mono text-[10px] text-gray-500 tabular-nums sm:text-xs"
+							class="absolute text-[10px] text-gray-500 tabular-nums sm:text-xs"
 							style="
-                left: {(t / axisMax) * 100}%;
-                --pad: 4px;
-                transform: {i === ticks.length - 1
+                  left: {(t / axisMax) * 100}%;
+                  --pad: 4px;
+                  transform: {i === ticks.length - 1
 								? 'translateX(calc(-100% - var(--pad)))'
 								: 'translateX(var(--pad))'};
-                text-align: {i === ticks.length - 1 ? 'right' : 'left'};
-              "
+                  text-align: {i === ticks.length - 1 ? 'right' : 'left'};
+                "
 						>
 							{nf.format(t)}
 						</span>

@@ -2,6 +2,7 @@
 	import HeaderTermometro from '$lib/components/HeaderTermometro.svelte';
 	import BarPanel from '$lib/components/BarPanel.svelte';
 	import SidebarPanel from '$lib/components/SideBarPanel.svelte';
+	import Reset from '$lib/components/Reset.svelte';
 	let showDrawer = false;
 </script>
 
@@ -53,4 +54,5 @@
 			</div>
 		</div>
 	{/if}
+	<Reset />
 </div>
