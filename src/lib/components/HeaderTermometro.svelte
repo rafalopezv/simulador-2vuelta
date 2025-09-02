@@ -74,15 +74,14 @@
 					<div
 						class="absolute inset-0 rounded-md bg-gray-100"
 						style="
-    background: repeating-linear-gradient(
-      45deg,
-      #d1d5db,       /* gris base */
-      #d1d5db 4px,
-      #9ca3af 4px,
-      #9ca3af 8px
-    );
-    opacity: 0.3;   /* más sutil */
-  "
+						background: repeating-linear-gradient(
+							45deg,
+							#cbd5e1,      
+							#cbd5e1 2px,
+							#64748b 2px,  
+							#64748b 4px
+						  );
+						  opacity: 0.4;"
 					></div>
 
 					<!-- barra izquierda -->
@@ -114,7 +113,7 @@
 				</div>
 
 				<!-- fila inferior: binomios a los lados y meta al centro -->
-				<!-- fila inferior: nombres a los lados y meta EXACTAMENTE centrada -->
+
 				<div class="relative mt-2 h-5">
 					<!-- izquierda -->
 					<span

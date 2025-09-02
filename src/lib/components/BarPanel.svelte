@@ -11,6 +11,7 @@
 		FINALISTA_B_ID
 	} from '$lib/stores/nuevo';
 	import PartyBar from './Partido.svelte';
+	import { formatAxis } from '$lib/stores/axis.js';
 
 	const nf = new Intl.NumberFormat('en-US');
 	const labelW = '7rem';
@@ -119,7 +120,7 @@
 
 <section class="w-full px-2 sm:px-4">
 	<div class="rounded-xl border-gray-200 bg-white p-2.5 shadow-sm sm:p-3">
-		<h3 class="mb-4 text-center text-base font-semibold text-gray-900 sm:text-lg">
+		<h3 class="mb-4 text-center text-base font-semibold text-gray-700 sm:text-lg">
 			Resultados por partido (1ª vuelta)
 		</h3>
 
@@ -160,7 +161,7 @@
 				<div class="border-t border-dashed border-gray-200 pt-2">
 					<!-- Nulo: min 3.5% emitidos, no pasar baseline -->
 					<PartyBar
-						name="Nulo (editable)"
+						name="Nulo"
 						color="#111827"
 						votos={nuloObj.votos}
 						pct={nuloObj.pct}
@@ -204,7 +205,7 @@
                   text-align: {i === ticks.length - 1 ? 'right' : 'left'};
                 "
 						>
-							{nf.format(t)}
+							{formatAxis(t)}
 						</span>
 					{/each}
 				</div>

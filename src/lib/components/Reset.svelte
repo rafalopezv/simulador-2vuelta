@@ -1,64 +1,34 @@
 <script>
 	import { RotateCcw } from 'lucide-svelte';
-
 	import { resetAllStores } from '$lib/stores/nuevo';
 
 	function resetAll() {
-		resetAllStores(); // sin recargar la página
-	}
-
-	let showTip = false;
-	let pressTimer = null;
-
-	const show = () => (showTip = true);
-	const hide = () => (showTip = false);
-
-	function onPointerDown() {
-		if (pressTimer) return;
-		pressTimer = setTimeout(() => {
-			showTip = true;
-			pressTimer = null;
-		}, 600);
-	}
-
-	function onPointerUpOrCancel() {
-		if (pressTimer) {
-			clearTimeout(pressTimer);
-			pressTimer = null;
-		}
-		setTimeout(() => (showTip = false), 120);
+		resetAllStores(); // resetea sin recargar la página
 	}
 </script>
 
-<div class="fixed right-4 bottom-4 z-50 select-none">
+<div class="w-full">
+	<!-- Desktop / tablets: botón rectangular -->
 	<button
 		on:click={resetAll}
-		on:mouseenter={show}
-		on:mouseleave={hide}
-		on:focus={show}
-		on:blur={hide}
-		on:pointerdown={onPointerDown}
-		on:pointerup={onPointerUpOrCancel}
-		on:pointercancel={onPointerUpOrCancel}
-		class="group relative flex h-12 w-12 cursor-pointer items-center justify-center
-             rounded-full bg-white shadow-md ring-1 ring-gray-300
-             transition hover:bg-gray-100 hover:shadow-lg
-             focus:outline-none focus-visible:ring-2 focus-visible:ring-gray-400
-             active:scale-95"
-		aria-label="Resetear"
+		class="hidden w-full cursor-pointer items-center justify-center gap-2 rounded-lg border border-gray-300
+           bg-white px-3 py-2 text-sm font-medium text-gray-700 shadow-sm transition
+           hover:bg-gray-50 hover:text-gray-900 focus:ring-2 focus:ring-gray-400
+           focus:outline-none sm:flex"
 	>
-		<RotateCcw class="h-6 w-6 text-gray-700 transition group-hover:text-gray-900" />
+		<RotateCcw class="h-4 w-4" />
+		<span>Resetear</span>
+	</button>
 
-		<!-- Tooltip -->
-		<span
-			class="pointer-events-none absolute -top-9 left-1/2 -translate-x-1/2
-               translate-y-1 rounded-md bg-gray-900 px-2 py-1 text-xs text-white
-               opacity-0 shadow-md transition-all
-               duration-200 ease-out
-               group-hover:translate-y-0 group-hover:opacity-100
-               {showTip ? 'translate-y-0 opacity-100' : ''}"
-		>
-			Resetear
-		</span>
+	<!-- Mobile: solo ícono -->
+	<button
+		on:click={resetAll}
+		class="flex h-10 w-10 cursor-pointer items-center justify-center rounded-full border border-gray-300
+           bg-white shadow-sm transition hover:bg-gray-50 focus:ring-2 focus:ring-gray-400
+           focus:outline-none sm:hidden"
+		aria-label="Resetear"
+		title="Resetear"
+	>
+		<RotateCcw class="h-5 w-5 text-gray-700" />
 	</button>
 </div>

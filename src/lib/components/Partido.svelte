@@ -4,10 +4,16 @@
 	export let name;
 	export let color;
 	export let votos = 0;
-	export let axisMax = 2500000; // por defecto, se puede sobrescribir
+	export let axisMax = 2500000; // se puede sobrescribir
 
 	// % respecto a VÁLIDOS (lo pasas desde el panel)
 	export let pct = 0;
+
+	// 🔒 límites de arrastre
+	export let minVotos = 0;
+	export let maxVotos = Number.POSITIVE_INFINITY;
+	export let baseVotos = votos; // “nivel de renderización”/baseline
+	export let allowAboveBaseline = false; // solo true para PDC/LIBRE
 
 	const dispatch = createEventDispatcher();
 
@@ -27,8 +33,13 @@
 		return ratio * 100;
 	}
 
+	// ⛔️ aquí aplicamos los límites
 	function pctToVotos(p) {
-		return Math.round((p / 100) * axisMax);
+		const v = Math.round((p / 100) * (axisMax || 0));
+		const techo = allowAboveBaseline
+			? Math.min(maxVotos, axisMax || Infinity)
+			: Math.min(maxVotos, baseVotos ?? Infinity, axisMax || Infinity);
+		return clamp(v, minVotos, techo);
 	}
 
 	function emitFromClientX(clientX) {
@@ -59,12 +70,12 @@
 		hitEl.releasePointerCapture?.(e.pointerId);
 	}
 
-	const nfInt = new Intl.NumberFormat('en-US', {
+	// formato (en-US: miles con coma, decimales con punto)
+	const nfPctBig = new Intl.NumberFormat('en-US', {
 		minimumFractionDigits: 1,
 		maximumFractionDigits: 1
 	});
-
-	const nfPct = new Intl.NumberFormat('en-US', {
+	const nfInt = new Intl.NumberFormat('en-US', {
 		minimumFractionDigits: 0,
 		maximumFractionDigits: 0
 	});
@@ -87,18 +98,18 @@
       "
 		></div>
 
-		<!-- Label: votos (arriba) + % válidos (abajo) -->
+		<!-- Label: % válidos (grande) + votos (debajo) -->
 		<div
 			class="pointer-events-none absolute top-1/2 rounded-lg bg-white tabular-nums"
 			style="
-    left: {wPct}%;
-    transform: translate({nearRight ? '-10px' : '6px'}, -50%);
-    text-align: {nearRight ? 'right' : 'left'};
-    max-width: 40ch;
-  "
+        left: {wPct}%;
+        transform: translate({nearRight ? '-10px' : '6px'}, -50%);
+        text-align: {nearRight ? 'right' : 'left'};
+        max-width: 40ch;
+      "
 		>
-			<div class="font-semibold text-gray-900">{nfInt.format(pct)}%</div>
-			<div class="text-sm text-gray-500">{nfPct.format(votos)}</div>
+			<div class="font-semibold text-gray-900">{nfPctBig.format(pct)}%</div>
+			<div class="text-sm text-gray-500">{nfInt.format(votos)}</div>
 		</div>
 
 		<!-- Capa interactiva -->

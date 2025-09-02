@@ -54,5 +54,5 @@
 			</div>
 		</div>
 	{/if}
-	<Reset />
+	<!-- <Reset /> -->
 </div>

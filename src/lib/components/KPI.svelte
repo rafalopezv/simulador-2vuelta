@@ -43,7 +43,7 @@
              transition duration-300 ease-out hover:scale-105 hover:shadow-md"
 	>
 		<div class="text-[11px] font-medium text-gray-900 sm:text-xs">Votos emitidos</div>
-		<div class="text-lg font-semibold text-gray-900 sm:text-xl">
+		<div class="text-lg font-semibold text-gray-800 sm:text-xl">
 			{nf.format(asNum(data.emitidos?.votos))}
 		</div>
 		<div class="text-[11px] text-gray-500 sm:text-xs">
