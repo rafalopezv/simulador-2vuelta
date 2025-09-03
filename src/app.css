@@ -2,7 +2,13 @@
 @plugin '@tailwindcss/forms';
 @plugin '@tailwindcss/typography';
 
-/* Define la familia mono a Roboto Mono (v4) */
 @theme {
-	--font-mono: 'Roboto Mono', monospace;
+	--font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif;
+	/* Opcional: si usas números monoespaciados para %/votos */
+	--font-mono: ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+
+/* Aplica globalmente */
+body {
+	@apply font-sans;
 }

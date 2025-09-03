@@ -40,12 +40,12 @@
 				<!-- Izquierda (PDC) -->
 				<div class="text-left">
 					<div
-						class="text-6xl leading-[1] font-extrabold tracking-tight sm:text-6xl"
+						class="text-5xl leading-[1] font-extrabold tracking-tight tabular-nums sm:text-6xl"
 						style="color:{colorA1}"
 					>
 						{fmt1(a)}%
 					</div>
-					<div class="mt-0.5 text-[11px] sm:text-xs" style="color:{colorA1}">
+					<div class="mt-0.5 text-[11px] tabular-nums sm:text-xs" style="color:{colorA1}">
 						{nfUS.format(votosA)} votos
 					</div>
 				</div>
@@ -53,13 +53,13 @@
 				<!-- Derecha (LIBRE) -->
 				<div class="flex flex-col items-end justify-end text-right">
 					<div
-						class="text-6xl leading-[1] font-extrabold tracking-tight sm:text-6xl"
+						class="text-5xl leading-[1] font-extrabold tracking-tight tabular-nums sm:text-6xl"
 						style="color:{colorB1}"
 					>
 						{fmt1(b)}%
 					</div>
 					<div
-						class="mt-0.5 inline-block text-right text-[11px] sm:text-xs"
+						class="mt-0.5 inline-block text-right text-[11px] tabular-nums sm:text-xs"
 						style="color:{colorB1}"
 					>
 						{nfUS.format(votosB)} votos

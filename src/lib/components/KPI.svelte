@@ -29,10 +29,10 @@
              transition duration-300 ease-out hover:scale-105 hover:shadow-md"
 	>
 		<div class="text-[11px] font-medium text-gray-900 sm:text-xs">Votos válidos</div>
-		<div class="text-lg font-semibold text-[#333333] sm:text-xl">
+		<div class="text-lg font-semibold text-gray-800 tabular-nums sm:text-xl">
 			{nf.format(asNum(data.validos?.votos))}
 		</div>
-		<div class="text-[11px] text-gray-500 sm:text-xs">
+		<div class="text-[11px] text-gray-500 tabular-nums sm:text-xs">
 			{fmtPct(data.validos?.pctEmit)}
 		</div>
 	</div>
@@ -43,10 +43,10 @@
              transition duration-300 ease-out hover:scale-105 hover:shadow-md"
 	>
 		<div class="text-[11px] font-medium text-gray-900 sm:text-xs">Votos emitidos</div>
-		<div class="text-lg font-semibold text-gray-800 sm:text-xl">
+		<div class="text-lg font-semibold text-gray-800 tabular-nums sm:text-xl">
 			{nf.format(asNum(data.emitidos?.votos))}
 		</div>
-		<div class="text-[11px] text-gray-500 sm:text-xs">
+		<div class="text-[11px] text-gray-500 tabular-nums sm:text-xs">
 			{fmtPct(data.emitidos?.pctHabilitados)}
 		</div>
 	</div>
@@ -57,10 +57,10 @@
              transition duration-300 ease-out hover:scale-105 hover:shadow-md"
 	>
 		<div class="text-[11px] font-medium text-gray-900 sm:text-xs">Votos nulos</div>
-		<div class="text-lg font-semibold text-gray-900 sm:text-xl">
+		<div class="text-lg font-semibold text-gray-800 tabular-nums sm:text-xl">
 			{fmtPct(data.nulos?.pctEmit)}
 		</div>
-		<div class="text-[11px] text-gray-500 sm:text-xs">
+		<div class="text-[11px] text-gray-500 tabular-nums sm:text-xs">
 			{nf.format(asNum(data.nulos?.votos))}
 		</div>
 	</div>
@@ -71,7 +71,7 @@
              transition duration-300 ease-out hover:scale-105 hover:shadow-md"
 	>
 		<div class="text-[11px] font-medium text-gray-900 sm:text-xs">Habilitados</div>
-		<div class="text-lg font-semibold text-gray-900 sm:text-xl">
+		<div class="text-lg font-semibold text-gray-800 tabular-nums sm:text-xl">
 			{nf.format(asNum(data.habilitados))}
 		</div>
 	</div>
