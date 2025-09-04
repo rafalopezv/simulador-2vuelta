@@ -1,5 +1,4 @@
 <script>
-	// store wiring
 	import {
 		pctA_valid,
 		pctB_valid,
@@ -8,134 +7,167 @@
 		FINALISTA_B_ID
 	} from '$lib/stores/nuevo';
 
-	// brand colors
-	const colorA = '#4AA5A3'; // PDC
-	const colorA1 = '#469B99'; // PDC
-	const colorB = '#F06B66'; // LIBRE
-	const colorB1 = '#EE5D58'; // LIBRE
+	// Colores marca
+	const colorA = '#4AA5A3',
+		colorA1 = '#469B99';
+	const colorB = '#F06B66',
+		colorB1 = '#EE5D58';
 
-	// formatting
+	// Formatos
 	const nfUS = new Intl.NumberFormat('en-US');
 	const fmt1 = (x) => (Number.isFinite(+x) ? (+x).toFixed(1) : '—');
 
-	// reactive % (over válidos)
+	// % (sobre válidos)
 	$: a = Math.max(0, Math.min(100, +$pctA_valid || 0));
 	$: b = Math.max(0, Math.min(100, +$pctB_valid || 0));
 
-	// reactive votes from store (fallback 0)
+	// votos
 	$: votosA = $partidos?.find?.((p) => p.id === FINALISTA_A_ID)?.votos ?? 0;
 	$: votosB = $partidos?.find?.((p) => p.id === FINALISTA_B_ID)?.votos ?? 0;
 
-	// widths (dejan hueco si a+b<100)
-	$: overlapSafe = Math.max(0, Math.min(100, a + b));
+	// anchos
 	$: leftWidth = a;
 	$: rightWidth = b;
+	$: gapWidth = Math.max(0, 100 - (leftWidth + rightWidth));
+
+	// Reglas de visibilidad de etiquetas dentro de barra
+	const MIN_INSIDE_FOR_VOTES = 10; // % mínimo de ancho para meter los votos dentro
+	$: showVotesInsideLeft = leftWidth >= MIN_INSIDE_FOR_VOTES;
+	$: showVotesInsideRight = rightWidth >= MIN_INSIDE_FOR_VOTES;
 </script>
 
-<section class="mx-auto mt-12 max-w-[1500px] rounded-xl bg-white p-2.5 shadow-sm sm:p-3">
-	<div class="mx-auto max-w-6xl px-4 py-4 sm:px-6 sm:py-5">
-		<div class="relative">
-			<!-- fila superior: % grande y debajo votos (compacto y alineado) -->
-			<div class="flex items-end justify-between">
-				<!-- Izquierda (PDC) -->
-				<div class="text-left">
-					<div
-						class="text-5xl leading-[1] font-extrabold tracking-tight tabular-nums sm:text-6xl"
-						style="color:{colorA1}"
-					>
-						{fmt1(a)}%
+<section class="w-full">
+	<div class="mx-auto max-w-[1600px] px-4 sm:px-6 lg:px-8">
+		<div class="rounded-xl bg-white p-3 shadow-sm ring-1 ring-gray-200 sm:p-4">
+			<div class="relative">
+				<!-- % GRANDES ARRIBA -->
+
+				<div class="mb-1.5 flex items-end justify-between sm:mb-2">
+					<div class="text-left">
+						<div
+							class="translate-y-[2px] text-4xl leading-none font-extrabold tabular-nums sm:text-5xl"
+							style="color:{colorA1}"
+						>
+							{fmt1(a)}%
+						</div>
 					</div>
-					<div class="mt-0.5 text-[11px] tabular-nums sm:text-xs" style="color:{colorA1}">
-						{nfUS.format(votosA)} votos
+					<div class="text-right">
+						<div
+							class="translate-y-[2px] text-4xl leading-none font-extrabold tabular-nums sm:text-5xl"
+							style="color:{colorB1}"
+						>
+							{fmt1(b)}%
+						</div>
 					</div>
 				</div>
 
-				<!-- Derecha (LIBRE) -->
-				<div class="flex flex-col items-end justify-end text-right">
+				<!-- CHIP del gap: absoluto, no ocupa espacio -->
+				{#if gapWidth > 0.1}
 					<div
-						class="text-5xl leading-[1] font-extrabold tracking-tight tabular-nums sm:text-6xl"
-						style="color:{colorB1}"
+						class="pointer-events-none absolute left-1/2 z-30 -translate-x-1/2 translate-y-[-35px]"
 					>
-						{fmt1(b)}%
+						<span
+							class=" px-2 py-0.5 text-xs font-semibold tracking-tight text-gray-600 tabular-nums sm:text-sm"
+						>
+							{fmt1(gapWidth)}% disputables
+						</span>
 					</div>
-					<div
-						class="mt-0.5 inline-block text-right text-[11px] tabular-nums sm:text-xs"
-						style="color:{colorB1}"
-					>
-						{nfUS.format(votosB)} votos
-					</div>
-				</div>
-			</div>
+				{/if}
+				<!-- TERMÓMETRO -->
+				<div class="relative h-12 w-full overflow-hidden rounded-md sm:h-12">
+					<!-- Riel base -->
+					<div class="absolute inset-0 rounded-md bg-gray-100"></div>
 
-			<!-- termómetro (pegado a los números) -->
-			<div class="mt-1 sm:mt-2">
-				<div class="relative h-10 w-full overflow-hidden rounded-md sm:h-10">
-					<!-- riel -->
-					<div
-						class="absolute inset-0 rounded-md bg-gray-100"
-						style="
-						background: repeating-linear-gradient(
-							45deg,
-							#cbd5e1,      
-							#cbd5e1 2px,
-							#64748b 2px,  
-							#64748b 4px
-						  );
-						  opacity: 0.4;"
-					></div>
-
-					<!-- barra izquierda -->
+					<!-- Barra izquierda -->
 					<div
 						class="absolute inset-y-0 left-0 z-10"
-						style="
-                width:{leftWidth}%;
-                background:{colorA1};
-                border-top-left-radius:8px;
-                border-bottom-left-radius:8px;
-                transition: width 220ms cubic-bezier(0.22,0.61,0.36,1);
-              "
+						style="width:{leftWidth}%; background:{colorA1}; border-top-left-radius:8px; border-bottom-left-radius:8px; transition: width 240ms cubic-bezier(0.22,0.61,0.36,1);"
+						aria-label="Paz-Lara"
 					></div>
 
 					<!-- barra derecha -->
 					<div
 						class="absolute inset-y-0 right-0 z-10"
-						style="
-                width:{rightWidth}%;
-                background:{colorB1};
-                border-top-right-radius:8px;
-                border-bottom-right-radius:8px;
-                transition: width 220ms cubic-bezier(0.22,0.61,0.36,1);
-              "
+						style="width:{rightWidth}%; background:{colorB1}; border-top-right-radius:8px; border-bottom-right-radius:8px; transition: width 240ms cubic-bezier(0.22,0.61,0.36,1);"
+						aria-label="Quiroga-Velasco"
 					></div>
 
-					<!-- línea 50% (ligeramente sobresaliente) -->
-					<div class="absolute left-1/2 z-20 w-[2px] bg-white" style="top:-6px; bottom:-6px;"></div>
+					<!-- VOTOS DENTRO/AFUERA: IZQUIERDA -->
+					{#if showVotesInsideLeft}
+						<div
+							class="pointer-events-none absolute inset-y-0 left-0 z-20 flex items-center pl-3"
+							style="width:{leftWidth}%"
+						>
+							<span class="px-1 text-[12px] font-medium text-white tabular-nums sm:text-sm"
+								>{nfUS.format(votosA)} votos</span
+							>
+						</div>
+					{:else}
+						<div
+							class="pointer-events-none absolute inset-y-0 z-20 flex items-center"
+							style="left: calc({leftWidth}% + 6px)"
+						>
+							<span class="px-1 text-[12px] font-medium text-white tabular-nums sm:text-sm"
+								>{nfUS.format(votosA)}</span
+							>
+						</div>
+					{/if}
+
+					{#if showVotesInsideRight}
+						<div
+							class="pointer-events-none absolute inset-y-0 right-0 z-20 flex items-center justify-end pr-3"
+							style="width:{rightWidth}%"
+						>
+							<span class="px-1 text-[12px] font-medium text-white tabular-nums sm:text-sm"
+								>{nfUS.format(votosB)} votos</span
+							>
+						</div>
+					{:else}
+						<div
+							class="pointer-events-none absolute inset-y-0 z-20 flex items-center"
+							style="right: calc({rightWidth}% + 6px)"
+						>
+							<span
+								class="rounded-md bg-white px-2 py-0.5 text-[12px] font-semibold tabular-nums sm:text-sm"
+								style="color:{colorB1}; box-shadow:0 1px 0 rgba(0,0,0,.04);"
+							>
+								{nfUS.format(votosB)}
+							</span>
+						</div>
+					{/if}
+
+					<!-- hueco central “vacío” -->
+					<div class="pointer-events-none absolute inset-0 z-0">
+						<div
+							class="h-full w-full rounded-[6px] bg-white/30 backdrop-blur-[1px]"
+							style="box-shadow: inset 0 0 0 1px rgba(148,163,184,.4);"
+						></div>
+					</div>
+					<!-- Línea 50% -->
+					<div
+						class="absolute left-1/2 z-30 w-[2px] bg-gray-600"
+						style="top:-6px; bottom:-6px;"
+					></div>
 				</div>
 
-				<!-- fila inferior: binomios a los lados y meta al centro -->
-
+				<!-- Etiquetas bajo el termómetro -->
 				<div class="relative mt-2 h-5">
-					<!-- izquierda -->
 					<span
 						class="absolute left-0 text-[12px] font-semibold tracking-tight sm:text-sm"
 						style="color:{colorA1}"
 					>
 						Paz-Lara
 					</span>
-
-					<!-- derecha -->
 					<span
 						class="absolute right-0 text-[12px] font-semibold tracking-tight sm:text-sm"
 						style="color:{colorB1}"
 					>
 						Quiroga-Velasco
 					</span>
-
-					<!-- meta centrada justo bajo la línea 50% -->
 					<h2
 						class="absolute left-1/2 -translate-x-1/2 text-xs font-semibold tracking-tight text-gray-600 sm:text-sm"
 					>
-						50% + 1 voto
+						Meta
 					</h2>
 				</div>
 			</div>

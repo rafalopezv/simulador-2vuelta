@@ -17,7 +17,7 @@
 	</div>
 
 	<!-- Ajuste avanzado (muestra/oculta el ScopeSelector) -->
-	<div class="rounded-2xl bg-white p-3 ring-1 ring-gray-200 sm:p-4">
+	<div class="cursor-pointer rounded-2xl bg-white p-3 ring-1 ring-gray-200 sm:p-4">
 		<button
 			type="button"
 			on:click={() => (advancedOpen = !advancedOpen)}
@@ -28,7 +28,7 @@
 			aria-controls="advanced-scope"
 		>
 			<span class="inline-flex items-center gap-2">
-				<Settings class="h-4 w-4 opacity-80" />
+				<Settings class="h-4 w-4  opacity-80" />
 				Ajuste avanzado
 			</span>
 			<span class="text-gray-500">{advancedOpen ? '–' : '+'}</span>

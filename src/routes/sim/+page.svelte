@@ -1,5 +1,5 @@
 <script>
-	import Test from '$lib/components/Test.svelte';
+	import Main from '$lib/components/Main.svelte';
 </script>
 
-<Test />
+<Main />

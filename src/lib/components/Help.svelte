@@ -15,35 +15,30 @@
 
 <svelte:window on:keydown={onKeydown} />
 
-<!-- Botón flotante de ayuda (icono SVG minimal) -->
-<div class="fixed right-4 bottom-20 z-50">
+<!-- Botón flotante de ayuda -->
+<div class="fixed top-4 right-4 z-50 sm:top-6">
 	<button
 		on:click={() => (open = true)}
-		class="flex h-10 w-10 cursor-pointer items-center justify-center
-             rounded-full bg-white shadow-md ring-1 ring-gray-300
-             transition hover:bg-gray-100 hover:shadow-lg
-             focus:outline-none focus-visible:ring-2 focus-visible:ring-gray-400"
+		class="relative flex h-[27px] w-[27px] cursor-pointer items-center justify-center
+             rounded-full bg-[#333333] shadow-md ring-1 ring-gray-200
+             transition-transform duration-200
+             hover:scale-105 hover:shadow-lg
+             focus:outline-none focus-visible:ring-2 focus-visible:ring-gray-400
+             active:scale-95"
 		aria-label="Ayuda"
 		title="Cómo usar"
 	>
-		<!-- INFO ICON (simple, monocromo) -->
-		<svg
-			xmlns="http://www.w3.org/2000/svg"
-			viewBox="0 0 24 24"
-			width="18"
-			height="18"
-			fill="none"
-			stroke="currentColor"
-			stroke-width="1.6"
-			stroke-linecap="round"
-			stroke-linejoin="round"
-			class="text-gray-700"
+		<!-- Capas decorativas -->
+		<span
+			class="pointer-events-none absolute inset-0 grid cursor-pointer place-items-center"
 			aria-hidden="true"
 		>
-			<circle cx="12" cy="12" r="9" />
-			<line x1="12" y1="10" x2="12" y2="16" />
-			<circle cx="12" cy="7.5" r="1" fill="currentColor" stroke="none" />
-		</svg>
+			<span class="h-3 w-3 cursor-pointer rounded-full bg-white"></span>
+			<span class="absolute h-6 w-6 cursor-pointer rounded-full bg-white"></span>
+		</span>
+
+		<!-- Icono -->
+		<img src="/info.svg" alt="info" class="relative z-10 h-[22px] w-[22px]" />
 	</button>
 </div>
 
@@ -57,27 +52,27 @@
 			transition:fade={{ duration: DUR_OVERLAY, easing: cubicOut }}
 		/>
 
-		<!-- Drawer a la derecha -->
+		<!-- Drawer con scroll interno -->
 		<aside
 			role="dialog"
 			aria-label="Ayuda del simulador"
-			class="relative ml-auto h-full w-full max-w-md bg-white shadow-xl ring-1 ring-gray-200 sm:max-w-sm"
+			class="relative ml-auto flex h-full w-full max-w-md flex-col bg-white shadow-xl ring-1 ring-gray-200 sm:max-w-sm"
 			in:fade={{ duration: DUR_DRAWER, easing: cubicOut }}
 			out:fade={{ duration: DUR_DRAWER, easing: cubicOut }}
-			style="transform: translateX(0);"
 		>
-			<!-- Header -->
-			<div class="flex items-center justify-between border-b border-gray-200 px-4 py-3">
+			<!-- Header fijo -->
+			<div
+				class="flex flex-shrink-0 items-center justify-between border-b border-gray-200 px-4 py-3"
+			>
 				<h2 class="text-sm font-semibold text-gray-900">Cómo usar el simulador</h2>
 				<button
 					on:click={() => (open = false)}
 					class="inline-flex h-8 w-8 cursor-pointer items-center justify-center
-                   rounded-md hover:bg-gray-100 focus:outline-none focus-visible:ring-2
-                   focus-visible:ring-gray-400"
+                     rounded-md hover:bg-gray-100 focus:outline-none focus-visible:ring-2
+                     focus-visible:ring-gray-400"
 					aria-label="Cerrar ayuda"
 					title="Cerrar"
 				>
-					<!-- X minimal -->
 					<svg
 						xmlns="http://www.w3.org/2000/svg"
 						viewBox="0 0 24 24"
@@ -96,8 +91,8 @@
 				</button>
 			</div>
 
-			<!-- Contenido -->
-			<div class="space-y-4 px-4 py-4 text-sm text-gray-700">
+			<!-- Contenido scrollable -->
+			<div class="flex-1 space-y-5 overflow-y-auto px-4 py-4 text-sm text-gray-700">
 				<section>
 					<h3 class="mb-1 text-[13px] font-semibold text-gray-900">Idea general</h3>
 					<p>
@@ -123,23 +118,46 @@
 				</section>
 
 				<section>
-					<h3 class="mb-1 text-[13px] font-semibold text-gray-900">Límites</h3>
-					<ul class="list-inside list-disc text-gray-700">
-						<li>PDC y LIBRE pueden subir o bajar.</li>
-						<li>Otros partidos no suben por encima de su base.</li>
-						<li>Nulo tiene mínimo (p. ej. 3.5%) y no supera su base.</li>
+					<h3 class="mb-1 text-[13px] font-semibold text-gray-900">Supuestos y límites</h3>
+					<ul class="list-inside list-disc space-y-1 text-gray-700">
+						<li>
+							<span class="font-medium">Blanco:</span> no varía, pues históricamente ha sido muy estable.
+						</li>
+						<li>
+							<span class="font-medium">Nulo:</span> no puede subir; se asume que tenderá a reducirse
+							por la declaración de Evo que sugiere liberación del voto nulo.
+						</li>
+						<li>
+							<span class="font-medium">Nulo (mínimo):</span> se fijó en el promedio de elecciones nacionales
+							como límite inferior.
+						</li>
+						<li>
+							<span class="font-medium">Padrón electoral:</span> se mantiene fijo; el TSE indicó que
+							se usará el mismo de la primera vuelta.
+						</li>
+						<li>
+							<span class="font-medium">Participación:</span> se conserva igual; es decir, el número
+							de votos emitidos totales permanece constante.
+						</li>
+						<li>
+							<span class="font-medium">Variable:</span> únicamente se puede modificar la distribución
+							de los votos válidos.
+						</li>
 					</ul>
 				</section>
 
-				<section class="rounded-lg bg-gray-50 p-3 ring-1 ring-gray-200">
-					<p class="mb-2 text-[13px] text-gray-600">¿Dudas o feedback? Contáctanos:</p>
-					<div class="flex items-center gap-4">
-						<!-- Mail -->
+				<!-- Footer con autor -->
+				<section class="mt-6 border-t border-gray-200 pt-4">
+					<p class="text-[13px] text-gray-600">Autor:</p>
+					<div class="mt-1 flex items-center gap-2 text-gray-700">
+						<span class="font-medium">Rafa Lopez</span><br />
 						<a
 							href="mailto:lopezvalverde.rafael@gmail.com"
-							class="flex items-center gap-2 text-gray-700 transition hover:text-gray-900"
+							class="flex items-center gap-1 text-gray-600 transition hover:text-gray-900"
 						>
-							<Mail />
+							<Mail class="h-4 w-4" />
+							<!-- 👈 icono Lucide -->
+							<span></span>
 						</a>
 					</div>
 				</section>

@@ -1,18 +1,14 @@
 <script>
 	import { onMount, onDestroy } from 'svelte';
 
-	// Colores consistentes con tu app
-	const colorA = '#4AA5A3'; // PDC
-	const colorA1 = '#469B99'; // PDC
-	const colorB = '#F06B66'; // LIBRE
-	const colorB1 = '#EE5D58'; // LIBRE
+	// Colores
+	const colorA = '#4AA5A3'; // PDC (barra)
+	const colorA1 = '#469B99'; // PDC (texto)
+	const colorB = '#F06B66'; // LIBRE (barra)
+	const colorB1 = '#EE5D58'; // LIBRE (texto)
 
-	// === CONTROLES VISUALES PARA LAS PSEUDOBARRAS ===
-	// Amplifica el “llenado” inicial (solo apariencia). 1.0 = tal cual, 1.3 = 30% más anchas al inicio
+	// === PSEUDOBARRAS (otros + nulo) ===
 	const BASE_POOL_AMPLIFY = 3.9;
-
-	// Otros partidos + Nulo: peso relativo (reparto) y velocidad de drenaje
-	// drainSpeed: 1.0 normal, >1 más rápido, <1 más lento
 	const OTHERS = [
 		{ id: 'AP', color: '#66BEE5', weight: 0.16, drainSpeed: 1.1 },
 		{ id: 'LYP', color: '#444444', weight: 0.08, drainSpeed: 0.9 },
@@ -27,46 +23,40 @@
 	// Estado inicial y meta
 	const A0 = 32.0; // PDC arranque
 	const B0 = 26.0; // LIBRE arranque
-	const TARGET = 49; // objetivo al que suben y del que bajan
+	const TARGET = 49; // objetivo
 
-	// ---- CONTROLES DE ANIMACIÓN ----
-	const PERIOD_MS = 9000; // duración total del loop (ajusta velocidad)
-	const EASE_POWER = 1.4; // 1 = lineal, 2–3 = ease-in-out más suave
+	// Animación
+	const PERIOD_MS = 9000;
+	const EASE_POWER = 1.4;
 
 	// Estado animado
 	let pctA = A0;
 	let pctB = B0;
 
-	// Votos: variación sutil para acompañar
+	// Votos (demo)
 	let votosA = 1_717_432;
 	let votosB = 1_430_176;
 
-	// Formato
 	const nfUS = new Intl.NumberFormat('en-US');
 	const fmt1 = (x) => (Number.isFinite(+x) ? (+x).toFixed(1) : '—');
 
-	// Termómetro
+	// Termómetro widths
 	$: leftWidth = Math.max(0, Math.min(100, pctA));
 	$: rightWidth = Math.max(0, Math.min(100, pctB));
-	$: gapWidthPct = Math.max(0, 100 - (leftWidth + rightWidth));
+	$: gapWidth = Math.max(0, 100 - (leftWidth + rightWidth)); // "disputables"
 
 	// Bolsa “real” de partida (otros + nulo)
 	const POOL0 = Math.max(0, 100 - (A0 + B0));
 
-	// Progreso de transferencia (0 → 1): cuánto de la bolsa ya se vació hacia PDC/LIBRE
+	// Progreso de transferencia 0→1
 	$: deltaUp = Math.max(0, pctA + pctB - (A0 + B0));
 	$: transferProgress = POOL0 > 0 ? Math.max(0, Math.min(1, deltaUp / POOL0)) : 0;
 
-	// Pseudobarras: base más cargada + drenaje diferencial
-	// baseWidthPct: ancho inicial amplificado; luego se multiplica por (1 - drainSpeed * progress)
+	// Pseudobarras con drenaje diferencial (solo apariencia)
 	$: otherBars = OTHERS.map((o) => {
 		const baseWidthPct = Math.min(100, POOL0 * BASE_POOL_AMPLIFY * (o.weight / TOTAL_WEIGHT));
 		const drained = Math.max(0, 1 - o.drainSpeed * transferProgress);
-		return {
-			id: o.id,
-			color: o.color,
-			widthPct: baseWidthPct * drained
-		};
+		return { id: o.id, color: o.color, widthPct: baseWidthPct * drained };
 	});
 
 	// Easing ping-pong
@@ -80,22 +70,20 @@
 	function frame(ts) {
 		if (start == null) start = ts;
 		const elapsed = (ts - start) % PERIOD_MS;
-
-		// Progreso 0→1→0
 		const half = PERIOD_MS / 2;
 		const up = elapsed <= half;
 		const uLinear = up ? elapsed / half : 1 - (elapsed - half) / half; // 0..1..0
 		const u = easeInOutPow(uLinear, EASE_POWER);
 
-		// Interpolación a TARGET y de regreso
+		// Interpolación a TARGET y regreso
 		pctA = A0 + (TARGET - A0) * u;
 		pctB = B0 + (TARGET - B0) * u;
 
-		// Votos con variación sutil
+		// Votos (demo) con variación sutil
 		const VA0 = 1_717_432,
 			VB0 = 1_430_176;
-		const AMP = 0.015; // ±1.5%
-		const shift = (uLinear - 0.5) * 2; // -1..1
+		const AMP = 0.015;
+		const shift = (uLinear - 0.5) * 2;
 		votosA = Math.round(VA0 * (1 + AMP * shift));
 		votosB = Math.round(VB0 * (1 + AMP * shift));
 
@@ -108,6 +96,11 @@
 	onDestroy(() => {
 		if (raf) cancelAnimationFrame(raf);
 	});
+
+	// Mostrar votos dentro de barras si hay ancho suficiente
+	const MIN_INSIDE_FOR_VOTES = 10;
+	$: showVotesInsideLeft = leftWidth >= MIN_INSIDE_FOR_VOTES;
+	$: showVotesInsideRight = rightWidth >= MIN_INSIDE_FOR_VOTES;
 </script>
 
 <section class="flex min-h-dvh items-center justify-center bg-white">
@@ -125,119 +118,145 @@
 		</header>
 
 		<!-- Demo card -->
-		<div class="mx-auto mt-8 max-w-3xl rounded-xl bg-white p-4 ring-1 ring-gray-200 sm:p-5">
-			<!-- % grandes + votos -->
-			<div class="flex items-end justify-between">
-				<!-- Izquierda -->
+		<div
+			class="mx-auto mt-8 max-w-3xl rounded-xl bg-white p-4 shadow-sm ring-1 ring-gray-200 sm:p-5"
+		>
+			<!-- % grandes arriba (más pegados al termómetro) -->
+			<div class="mb-1.5 flex items-end justify-between sm:mb-2">
 				<div class="text-left">
 					<div
-						class="text-5xl leading-[1] font-extrabold tracking-tight tabular-nums sm:text-6xl"
+						class="translate-y-[2px] text-5xl leading-none font-extrabold tabular-nums sm:text-6xl"
 						style="color:{colorA1}"
 					>
 						{fmt1(pctA)}%
 					</div>
-					<div class="mt-0.5 text-[11px] tabular-nums sm:text-xs" style="color:{colorA1}">
-						{nfUS.format(votosA)} votos
-					</div>
 				</div>
-
-				<!-- Derecha -->
-				<div class="flex flex-col items-end justify-end text-right">
+				<div class="text-right">
 					<div
-						class="text-5xl leading-[1] font-extrabold tracking-tight tabular-nums sm:text-6xl"
+						class="translate-y-[2px] text-5xl leading-none font-extrabold tabular-nums sm:text-6xl"
 						style="color:{colorB1}"
 					>
 						{fmt1(pctB)}%
 					</div>
-					<div class="mt-0.5 text-[11px] tabular-nums sm:text-xs" style="color:{colorB1}">
-						{nfUS.format(votosB)} votos
+				</div>
+			</div>
+
+			<!-- Chip del gap (absoluto, no empuja nada) -->
+			{#if gapWidth > 0.1}
+				<div class="pointer-events-none relative">
+					<div class="absolute -top-6 left-1/2 z-30 -translate-x-1/2">
+						<span
+							class="rounded bg-gray-100/80 px-2 py-0.5 text-[11px] font-medium text-gray-700 tabular-nums sm:text-xs"
+						>
+							{fmt1(gapWidth)}% disputables
+						</span>
 					</div>
 				</div>
+			{/if}
+
+			<!-- Termómetro (estética nueva) -->
+			<div class="relative h-12 w-full overflow-hidden rounded-md sm:h-12">
+				<!-- Fondo neutro “sticky” con borde sutil -->
+				<div
+					class="absolute inset-0 z-0 rounded-[6px] bg-white/30 backdrop-blur-[1px]"
+					style="box-shadow: inset 0 0 0 1px rgba(148,163,184,.4);"
+				></div>
+
+				<!-- Barra izquierda (encima, cubre al fondo) -->
+				<div
+					class="absolute inset-y-0 left-0 z-10"
+					style="width:{leftWidth}%; background:{colorA}; border-top-left-radius:8px; border-bottom-left-radius:8px; transition: width 380ms cubic-bezier(0.22,0.61,0.36,1);"
+					aria-label="Paz-Lara"
+				></div>
+
+				<!-- Barra derecha (encima, cubre al fondo) -->
+				<div
+					class="absolute inset-y-0 right-0 z-10"
+					style="width:{rightWidth}%; background:{colorB}; border-top-right-radius:8px; border-bottom-right-radius:8px; transition: width 380ms cubic-bezier(0.22,0.61,0.36,1);"
+					aria-label="Quiroga-Velasco"
+				></div>
+
+				<!-- Votos dentro/afuera: izquierda -->
+				{#if showVotesInsideLeft}
+					<div
+						class="pointer-events-none absolute inset-y-0 left-0 z-20 flex items-center pl-3"
+						style="width:{leftWidth}%"
+					>
+						<span class="px-1 text-[12px] font-medium text-white tabular-nums sm:text-sm">
+							{nfUS.format(votosA)} votos
+						</span>
+					</div>
+				{:else}
+					<div
+						class="pointer-events-none absolute inset-y-0 z-20 flex items-center"
+						style="left: calc({leftWidth}% + 6px)"
+					>
+						<span
+							class="rounded-md bg-white px-2 py-0.5 text-[12px] font-semibold tabular-nums sm:text-sm"
+							style="color:{colorA1}; box-shadow:0 1px 0 rgba(0,0,0,.04);"
+						>
+							{nfUS.format(votosA)}
+						</span>
+					</div>
+				{/if}
+
+				<!-- Votos dentro/afuera: derecha -->
+				{#if showVotesInsideRight}
+					<div
+						class="pointer-events-none absolute inset-y-0 right-0 z-20 flex items-center justify-end pr-3"
+						style="width:{rightWidth}%"
+					>
+						<span class="px-1 text-[12px] font-medium text-white tabular-nums sm:text-sm">
+							{nfUS.format(votosB)} votos
+						</span>
+					</div>
+				{:else}
+					<div
+						class="pointer-events-none absolute inset-y-0 z-20 flex items-center"
+						style="right: calc({rightWidth}% + 6px)"
+					>
+						<span
+							class="rounded-md bg-white px-2 py-0.5 text-[12px] font-semibold tabular-nums sm:text-sm"
+							style="color:{colorB1}; box-shadow:0 1px 0 rgba(0,0,0,.04);"
+						>
+							{nfUS.format(votosB)}
+						</span>
+					</div>
+				{/if}
+
+				<!-- Línea 50% -->
+				<div
+					class="absolute left-1/2 z-30 w-[2px] bg-gray-600"
+					style="top:-6px; bottom:-6px;"
+				></div>
 			</div>
 
-			<!-- Termómetro -->
-			<div class="mt-2 sm:mt-3">
-				<div class="relative h-10 w-full overflow-hidden rounded-md">
-					<!-- riel base -->
-					<div class="absolute inset-0 rounded-md bg-gray-100"></div>
-
-					<!-- barra izquierda -->
-					<div
-						class="absolute inset-y-0 left-0 z-10"
-						style="
-				width:{leftWidth}%;
-				background:{colorA};
-				border-top-left-radius:8px;
-				border-bottom-left-radius:8px;
-				transition: width 380ms cubic-bezier(0.22,0.61,0.36,1);
-			  "
-					></div>
-
-					<!-- barra derecha -->
-					<div
-						class="absolute inset-y-0 right-0 z-10"
-						style="
-				width:{rightWidth}%;
-				background:{colorB};
-				border-top-right-radius:8px;
-				border-bottom-right-radius:8px;
-				transition: width 380ms cubic-bezier(0.22,0.61,0.36,1);
-			  "
-					></div>
-
-					<!-- gap central con rayas (solo si hay espacio) -->
-					<div
-						class="absolute inset-0 z-0"
-						style="
-      background:
-        repeating-linear-gradient(
-          45deg,
-          #cbd5e1, #cbd5e1 2px,
-          #64748b, #64748b 4px
-        );
-      opacity: {gapWidthPct > 0.05 ? 0.4 : 0};
-      transition: opacity 200ms ease-out;
-    "
-					></div>
-
-					<!-- línea 50% (sobresale) -->
-					<div class="absolute left-1/2 z-20 w-[2px] bg-white" style="top:-8px; bottom:-8px;"></div>
-				</div>
-
-				<!-- Etiquetas bajo el termómetro -->
-				<div class="relative mt-2 h-5">
-					<span
-						class="absolute left-0 text-[12px] font-semibold tracking-tight sm:text-sm"
-						style="color:{colorA}"
-					>
-						Paz-Lara
-					</span>
-					<span
-						class="absolute right-0 text-[12px] font-semibold tracking-tight sm:text-sm"
-						style="color:{colorB}"
-					>
-						Quiroga-Velasco
-					</span>
-					<h3
-						class="pointer-events-none absolute left-1/2 -translate-x-1/2 text-xs font-medium text-gray-600 sm:text-sm"
-					>
-						50% + 1 voto
-					</h3>
-				</div>
+			<!-- Labels bajo el termómetro -->
+			<div class="relative mt-2 h-5">
+				<span
+					class="absolute left-0 text-[12px] font-semibold tracking-tight sm:text-sm"
+					style="color:{colorA1}"
+				>
+					Paz-Lara
+				</span>
+				<span
+					class="absolute right-0 text-[12px] font-semibold tracking-tight sm:text-sm"
+					style="color:{colorB1}"
+				>
+					Quiroga-Velasco
+				</span>
+				<h3 class="absolute left-1/2 -translate-x-1/2 text-xs font-medium text-gray-600 sm:text-sm">
+					Meta
+				</h3>
 			</div>
 
-			<!-- Pseudobarras: “otros partidos + nulo” con drenaje diferencial -->
-
+			<!-- Pseudobarras (otros + nulo) -->
 			<div class="mt-5 space-y-2">
 				{#each otherBars as ob}
 					<div class="h-3 w-full overflow-hidden">
 						<div
 							class="h-full rounded-r-[3px]"
-							style="
-			width:{ob.widthPct}%;
-			background:{ob.color};
-			transition: width 380ms cubic-bezier(0.22,0.61,0.36,1);
-		  "
+							style="width:{ob.widthPct}%; background:{ob.color}; transition: width 380ms cubic-bezier(0.22,0.61,0.36,1);"
 						></div>
 					</div>
 				{/each}
@@ -247,12 +266,11 @@
 		<!-- CTA -->
 		<div class="mt-8 flex justify-center">
 			<a
-				href="/sim"
-				class="inline-flex cursor-pointer items-center gap-2 rounded-[5px] bg-gray-800 px-6 py-3 text-base font-semibold
-		  text-white shadow-sm transition hover:bg-gray-900 focus:outline-none focus-visible:ring-2
-		  focus-visible:ring-gray-400 active:scale-[0.99]"
+				href="/test"
+				class="inline-flex cursor-pointer items-center gap-2 rounded-[5px] bg-gray-800 px-6 py-3 text-base font-semibold text-white shadow-sm transition hover:bg-gray-900 focus:outline-none focus-visible:ring-2 focus-visible:ring-gray-400 active:scale-[0.99]"
 			>
-				Comenzar <svg
+				Comenzar
+				<svg
 					xmlns="http://www.w3.org/2000/svg"
 					class="h-4 w-4 opacity-90"
 					viewBox="0 0 24 24"

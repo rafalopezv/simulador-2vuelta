@@ -1,61 +1,30 @@
+<!-- +page.svelte -->
 <script>
 	import HeaderTermometro from '$lib/components/HeaderTermometro.svelte';
 	import BarPanel from '$lib/components/BarPanel.svelte';
 	import SidebarPanel from '$lib/components/SideBarPanel.svelte';
-	import Reset from '$lib/components/Reset.svelte';
 	import Help from '$lib/components/Help.svelte';
 	let showDrawer = false;
 </script>
 
 <Help />
 
-<div class="min-h-screen bg-[#F8FAFC] pt-4 text-gray-900 sm:pt-8 lg:pt-4">
-	<!-- Termómetro siempre centrado y ancho completo -->
-	<div class="">
-		<HeaderTermometro />
-	</div>
-
-	<!-- Botón para abrir sidebar en móvil -->
-	<div class="mt-3 px-4 sm:px-6 lg:hidden">
-		<button
-			class="w-full rounded-lg bg-gray-900 px-3 py-2 text-sm text-white"
-			on:click={() => (showDrawer = true)}
-		>
-			Filtros & KPIs
-		</button>
-	</div>
-
-	<!-- Layout principal -->
+<!-- Contenedor de página: ocupa 100% del alto y centra el bloque -->
+<div class="min-h-dvh bg-[#F8FAFC] text-gray-900">
 	<div
-		class="mx-auto grid w-full max-w-[1600px] grid-cols-1 gap-y-4 px-4 py-4
-             sm:px-6 lg:grid-cols-[minmax(0,1fr)_320px] lg:items-center lg:gap-x-4 lg:gap-y-6 lg:px-8 lg:py-6"
+		class="mx-auto flex min-h-dvh w-full max-w-[1600px] flex-col
+                justify-center px-4 sm:px-6 lg:px-8"
 	>
-		<!-- Columna izquierda: gráfico -->
-		<div>
-			<BarPanel />
-		</div>
+		<!-- Bloque centrado (termómetro + grid) -->
+		<div class="flex flex-col gap-3 lg:gap-4">
+			<header class="pt-3 sm:pt-4 lg:pt-3">
+				<HeaderTermometro />
+			</header>
 
-		<!-- Columna derecha: sidebar (desktop) -->
-		<aside class="hidden self-center lg:block">
-			<SidebarPanel />
-		</aside>
-	</div>
-
-	<!-- Drawer móvil -->
-	{#if showDrawer}
-		<div class="fixed inset-0 z-50">
-			<div class="absolute inset-0 bg-black/40" on:click={() => (showDrawer = false)}></div>
-			<div
-				class="xs:w-[360px] absolute top-0 right-0 h-full w-[88%] overflow-y-auto bg-white p-4 shadow-xl"
-			>
-				<div class="mb-2 flex items-center justify-between">
-					<h2 class="text-base font-semibold">Filtros & KPIs</h2>
-					<button class="text-sm text-gray-600" on:click={() => (showDrawer = false)}>Cerrar</button
-					>
-				</div>
-				<SidebarPanel />
+			<div class="grid grid-cols-1 gap-3 lg:grid-cols-[minmax(0,1fr)_320px] lg:gap-6">
+				<div><BarPanel /></div>
+				<aside class="hidden self-start lg:block"><SidebarPanel /></aside>
 			</div>
 		</div>
-	{/if}
-	<!-- <Reset /> -->
+	</div>
 </div>
