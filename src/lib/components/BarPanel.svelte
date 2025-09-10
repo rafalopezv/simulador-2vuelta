@@ -1,4 +1,11 @@
 <script>
+	let tip = false;
+	const openHelp = () => {
+		// aquí disparas tu ayuda/drawer existente
+		const evt = new CustomEvent('open-help');
+		dispatchEvent(evt);
+	};
+
 	import {
 		partidos,
 		blanco,
@@ -101,9 +108,22 @@
 	<div
 		class="min-h-[560px] rounded-xl border-gray-200 bg-white p-2.5 shadow-sm sm:p-3 md:min-h-[640px]"
 	>
-		<h3 class="mb-4 text-center text-base font-semibold text-gray-700 sm:text-lg">
-			Resultados por partido (1ª vuelta)
-		</h3>
+		<!-- Bloque de títulos coordinados -->
+		<div class="mb-4 space-y-1 text-center">
+			<h3 class="text-base font-semibold text-gray-800 sm:text-lg">
+				Resultados por partido (1ª vuelta)
+			</h3>
+
+			<div class="flex items-center justify-center gap-2 text-gray-600">
+				<img src="/info.svg" alt="" class="h-4 w-4 opacity-80" />
+				<h3 class="text-[11px] leading-snug font-semibold sm:text-sm">
+					<span class="hidden sm:inline">
+						Arrastra una barra: los cambios se reflejan arriba, en tiempo real
+					</span>
+					<span class="sm:hidden">Arrastra una barra para ver el cambio arriba</span>
+				</h3>
+			</div>
+		</div>
 
 		<div class="relative" style="--label-w: {labelW};">
 			<!-- grid del eje detrás de las barras -->

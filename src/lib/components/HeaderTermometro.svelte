@@ -4,7 +4,8 @@
 		pctB_valid,
 		partidos,
 		FINALISTA_A_ID,
-		FINALISTA_B_ID
+		FINALISTA_B_ID,
+		destinoGlobal
 	} from '$lib/stores/nuevo';
 
 	// Colores marca
