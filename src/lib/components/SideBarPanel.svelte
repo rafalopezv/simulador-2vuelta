@@ -17,7 +17,7 @@
 	</div> -->
 
 	<!-- Ajuste avanzado (muestra/oculta el ScopeSelector) -->
-	<div class="cursor-pointer rounded-2xl bg-white p-3 ring-1 ring-gray-200 sm:p-4">
+	<!-- <div class="cursor-pointer rounded-2xl bg-white p-3 ring-1 ring-gray-200 sm:p-4">
 		<button
 			type="button"
 			on:click={() => (advancedOpen = !advancedOpen)}
@@ -39,7 +39,7 @@
 				<ScopeSelector />
 			</div>
 		{/if}
-	</div>
+	</div> -->
 
 	<!-- Destino: siempre visible -->
 
