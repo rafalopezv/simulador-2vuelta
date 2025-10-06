@@ -10,7 +10,7 @@
 <Help />
 
 <!-- Contenedor de página: ocupa 100% del alto y centra el bloque -->
-<div class="min-h-dvh bg-[#F8FAFC] text-gray-900">
+<div class="min-h-dvh bg-[#F5f5f7] text-gray-900">
 	<div
 		class="mx-auto flex min-h-dvh w-full max-w-[1600px] flex-col
                 justify-center px-4 sm:px-6 lg:px-8"

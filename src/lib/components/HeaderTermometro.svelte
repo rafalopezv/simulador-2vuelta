@@ -8,6 +8,9 @@
 		destinoGlobal
 	} from '$lib/stores/nuevo';
 
+	import { spring } from 'svelte/motion';
+	import DestinationToggle from './DestinationToggle.svelte';
+
 	// Colores marca
 	const colorA = '#4AA5A3',
 		colorA1 = '#469B99';
@@ -31,18 +34,31 @@
 	$: rightWidth = b;
 	$: gapWidth = Math.max(0, 100 - (leftWidth + rightWidth));
 
-	// Reglas de visibilidad de etiquetas dentro de barra
-	const MIN_INSIDE_FOR_VOTES = 10; // % mínimo de ancho para meter los votos dentro
+	// spring stores
+	const leftWidthSpring = spring(0, {
+		stiffness: 1 / 30,
+		damping: 0.25
+	});
+	const rightWidthSpring = spring(0, {
+		stiffness: 1 / 30,
+		damping: 0.25
+	});
+
+	// actualizar springs cuando cambian los % reales
+	$: leftWidthSpring.set(leftWidth);
+	$: rightWidthSpring.set(rightWidth);
+
+	// etiquetas dentro de barra
+	const MIN_INSIDE_FOR_VOTES = 10;
 	$: showVotesInsideLeft = leftWidth >= MIN_INSIDE_FOR_VOTES;
 	$: showVotesInsideRight = rightWidth >= MIN_INSIDE_FOR_VOTES;
 </script>
 
 <section class="w-full">
-	<div class="mx-auto max-w-[1600px] px-4 sm:px-6 lg:px-8">
+	<div class="mx-auto max-w-[1600px]">
 		<div class="rounded-xl bg-white p-3 shadow-sm ring-1 ring-gray-200 sm:p-4">
 			<div class="relative">
 				<!-- % GRANDES ARRIBA -->
-
 				<div class="mb-1.5 flex items-end justify-between sm:mb-2">
 					<div class="text-left">
 						<div
@@ -62,71 +78,76 @@
 					</div>
 				</div>
 
-				<!-- CHIP del gap: absoluto, no ocupa espacio -->
+				<div class="absolute left-1/2 z-30 -translate-x-1/2 -translate-y-[60px]">
+					<h3 class="text-base font-semibold text-gray-800 sm:text-lg">Resultados balotaje</h3>
+				</div>
+
+				<!-- CHIP del gap -->
 				{#if gapWidth > 0.1}
 					<div
 						class="pointer-events-none absolute left-1/2 z-30 -translate-x-1/2 translate-y-[-35px]"
 					>
 						<span
-							class=" px-2 py-0.5 text-xs font-semibold tracking-tight text-gray-600 tabular-nums sm:text-sm"
+							class="px-2 py-0.5 text-xs font-semibold tracking-tight text-gray-600 tabular-nums sm:text-sm"
 						>
 							{fmt1(gapWidth)}% disputables
 						</span>
 					</div>
 				{/if}
+
 				<!-- TERMÓMETRO -->
 				<div class="relative h-12 w-full overflow-hidden rounded-md sm:h-12">
-					<!-- Riel base -->
+					<!-- riel base -->
 					<div class="absolute inset-0 rounded-md bg-gray-100"></div>
 
-					<!-- Barra izquierda -->
+					<!-- barra izquierda -->
 					<div
 						class="absolute inset-y-0 left-0 z-10"
-						style="width:{leftWidth}%; background:{colorA1}; border-top-left-radius:8px; border-bottom-left-radius:8px; transition: width 240ms cubic-bezier(0.22,0.61,0.36,1);"
+						style="width:{$leftWidthSpring}%; background:{colorA1}; border-top-left-radius:8px; border-bottom-left-radius:8px;"
 						aria-label="Paz-Lara"
 					></div>
 
 					<!-- barra derecha -->
 					<div
 						class="absolute inset-y-0 right-0 z-10"
-						style="width:{rightWidth}%; background:{colorB1}; border-top-right-radius:8px; border-bottom-right-radius:8px; transition: width 240ms cubic-bezier(0.22,0.61,0.36,1);"
+						style="width:{$rightWidthSpring}%; background:{colorB1}; border-top-right-radius:8px; border-bottom-right-radius:8px;"
 						aria-label="Quiroga-Velasco"
 					></div>
 
-					<!-- VOTOS DENTRO/AFUERA: IZQUIERDA -->
+					<!-- VOTOS DENTRO/AFUERA -->
 					{#if showVotesInsideLeft}
 						<div
 							class="pointer-events-none absolute inset-y-0 left-0 z-20 flex items-center pl-3"
-							style="width:{leftWidth}%"
+							style="width:{$leftWidthSpring}%"
 						>
-							<span class="px-1 text-[12px] font-medium text-white tabular-nums sm:text-sm"
-								>{nfUS.format(votosA)} votos</span
-							>
+							<span class="px-1 text-[12px] font-medium text-white tabular-nums sm:text-sm">
+								{nfUS.format(votosA)} votos
+							</span>
 						</div>
 					{:else}
 						<div
 							class="pointer-events-none absolute inset-y-0 z-20 flex items-center"
-							style="left: calc({leftWidth}% + 6px)"
+							style="left: calc({$leftWidthSpring}% + 6px)"
 						>
-							<span class="px-1 text-[12px] font-medium text-white tabular-nums sm:text-sm"
-								>{nfUS.format(votosA)}</span
-							>
+							<span class="px-1 text-[12px] font-medium text-white tabular-nums sm:text-sm">
+								{nfUS.format(votosA)}
+							</span>
 						</div>
 					{/if}
 
 					{#if showVotesInsideRight}
 						<div
 							class="pointer-events-none absolute inset-y-0 right-0 z-20 flex items-center justify-end pr-3"
-							style="width:{rightWidth}%"
+							style="width:{$rightWidthSpring}%"
 						>
-							<span class="px-1 text-[12px] font-medium text-white tabular-nums sm:text-sm"
-								>{nfUS.format(votosB)} votos</span
-							>
+							<span class="px-1 text-[12px] font-medium text-white tabular-nums sm:text-sm">
+								{nfUS.format(votosB)} votos
+							</span>
 						</div>
 					{:else}
 						<div
 							class="pointer-events-none absolute inset-y-0 z-20 flex items-center"
-							style="right: calc({rightWidth}% + 6px)"
+							style="right: calc({$rightWidthSpring}% + 6px)"
 						>
 							<span
 								class="rounded-md bg-white px-2 py-0.5 text-[12px] font-semibold tabular-nums sm:text-sm"
@@ -144,32 +165,21 @@
 							style="box-shadow: inset 0 0 0 1px rgba(148,163,184,.4);"
 						></div>
 					</div>
+
 					<!-- Línea 50% -->
 					<div
-						class="absolute left-1/2 z-30 w-[2px] bg-gray-600"
+						class="absolute left-1/2 z-30 w-[1px] bg-[#333333]"
 						style="top:-6px; bottom:-6px;"
 					></div>
 				</div>
 
 				<!-- Etiquetas bajo el termómetro -->
-				<div class="relative mt-2 h-5">
-					<span
-						class="absolute left-0 text-[12px] font-semibold tracking-tight sm:text-sm"
-						style="color:{colorA1}"
+				<div class="relative mt-0 h-12" style="--toggle-w: 48px; --gap: 10px;">
+					<div
+						class="absolute top-1/2 left-1/2 mt-2 -translate-x-1/2 -translate-y-1/2 cursor-pointer"
 					>
-						Paz-Lara
-					</span>
-					<span
-						class="absolute right-0 text-[12px] font-semibold tracking-tight sm:text-sm"
-						style="color:{colorB1}"
-					>
-						Quiroga-Velasco
-					</span>
-					<h2
-						class="absolute left-1/2 -translate-x-1/2 text-xs font-semibold tracking-tight text-gray-600 sm:text-sm"
-					>
-						Meta
-					</h2>
+						<DestinationToggle />
+					</div>
 				</div>
 			</div>
 		</div>
