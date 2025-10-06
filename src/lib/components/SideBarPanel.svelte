@@ -12,9 +12,9 @@
 <div class="space-y-5">
 	<Reset />
 
-	<div class="rounded-2xl bg-white p-3 ring-1 ring-gray-200 sm:p-4">
+	<!-- <div class="rounded-2xl bg-white p-3 ring-1 ring-gray-200 sm:p-4">
 		<DestinationToggle />
-	</div>
+	</div> -->
 
 	<!-- Ajuste avanzado (muestra/oculta el ScopeSelector) -->
 	<div class="cursor-pointer rounded-2xl bg-white p-3 ring-1 ring-gray-200 sm:p-4">
