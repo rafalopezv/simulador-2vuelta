@@ -8,18 +8,17 @@
 		destinoGlobal
 	} from '$lib/stores/nuevo';
 
-	import { spring } from 'svelte/motion';
+	import { spring, tweened } from 'svelte/motion';
+	import { cubicOut } from 'svelte/easing';
+	import NumberFlow from '@number-flow/svelte';
 	import DestinationToggle from './DestinationToggle.svelte';
 
 	// Colores marca
 	const colorA = '#4AA5A3',
-		colorA1 = '#469B99';
-	const colorB = '#F06B66',
-		colorB1 = '#EE5D58';
+		colorA1 = '#4AA5A3';
 
-	// Formatos
-	const nfUS = new Intl.NumberFormat('en-US');
-	const fmt1 = (x) => (Number.isFinite(+x) ? (+x).toFixed(1) : '—');
+	const colorB = '#F06B66',
+		colorB1 = '#F06B66';
 
 	// % (sobre válidos)
 	$: a = Math.max(0, Math.min(100, +$pctA_valid || 0));
@@ -34,7 +33,7 @@
 	$: rightWidth = b;
 	$: gapWidth = Math.max(0, 100 - (leftWidth + rightWidth));
 
-	// spring stores
+	// spring stores for bar widths (keep bouncy for bars)
 	const leftWidthSpring = spring(0, {
 		stiffness: 1 / 30,
 		damping: 0.25
@@ -44,19 +43,49 @@
 		damping: 0.25
 	});
 
-	// actualizar springs cuando cambian los % reales
+	// tweened for percentages and vote counts (smooth, predictable)
+	const aTweened = tweened(0, {
+		duration: 300,
+		easing: cubicOut
+	});
+	const bTweened = tweened(0, {
+		duration: 300,
+		easing: cubicOut
+	});
+	const votosATweened = tweened(0, {
+		duration: 300,
+		easing: cubicOut
+	});
+	const votosBTweened = tweened(0, {
+		duration: 300,
+		easing: cubicOut
+	});
+	const gapWidthTweened = tweened(0, {
+		duration: 300,
+		easing: cubicOut
+	});
+
+	// actualizar animaciones cuando cambian los valores
 	$: leftWidthSpring.set(leftWidth);
 	$: rightWidthSpring.set(rightWidth);
+	$: aTweened.set(a);
+	$: bTweened.set(b);
+	$: votosATweened.set(votosA);
+	$: votosBTweened.set(votosB);
+	$: gapWidthTweened.set(gapWidth);
 
 	// etiquetas dentro de barra
 	const MIN_INSIDE_FOR_VOTES = 10;
 	$: showVotesInsideLeft = leftWidth >= MIN_INSIDE_FOR_VOTES;
 	$: showVotesInsideRight = rightWidth >= MIN_INSIDE_FOR_VOTES;
+
+	// Formateador para números
+	const nfUS = new Intl.NumberFormat('en-US');
 </script>
 
 <section class="w-full">
 	<div class="mx-auto max-w-[1600px]">
-		<div class="rounded-xl bg-white p-3 shadow-sm ring-1 ring-gray-200 sm:p-4">
+		<div class="rounded-xl bg-white p-3 shadow-sm ring-1 ring-gray-200 sm:px-14 sm:py-4">
 			<div class="relative">
 				<!-- % GRANDES ARRIBA -->
 				<div class="mb-1.5 flex items-end justify-between sm:mb-2">
@@ -65,7 +94,7 @@
 							class="translate-y-[2px] text-4xl leading-none font-extrabold tabular-nums sm:text-5xl"
 							style="color:{colorA1}"
 						>
-							{fmt1(a)}%
+							{$aTweened.toFixed(1)}%
 						</div>
 					</div>
 					<div class="text-right">
@@ -73,7 +102,7 @@
 							class="translate-y-[2px] text-4xl leading-none font-extrabold tabular-nums sm:text-5xl"
 							style="color:{colorB1}"
 						>
-							{fmt1(b)}%
+							{$bTweened.toFixed(1)}%
 						</div>
 					</div>
 				</div>
@@ -81,19 +110,6 @@
 				<div class="absolute left-1/2 z-30 -translate-x-1/2 -translate-y-[60px]">
 					<h3 class="text-base font-semibold text-gray-800 sm:text-lg">Resultados balotaje</h3>
 				</div>
-
-				<!-- CHIP del gap -->
-				{#if gapWidth > 0.1}
-					<div
-						class="pointer-events-none absolute left-1/2 z-30 -translate-x-1/2 translate-y-[-35px]"
-					>
-						<span
-							class="px-2 py-0.5 text-xs font-semibold tracking-tight text-gray-600 tabular-nums sm:text-sm"
-						>
-							{fmt1(gapWidth)}% disputables
-						</span>
-					</div>
-				{/if}
 
 				<!-- TERMÓMETRO -->
 				<div class="relative h-12 w-full overflow-hidden rounded-md sm:h-12">
@@ -121,7 +137,7 @@
 							style="width:{$leftWidthSpring}%"
 						>
 							<span class="px-1 text-[12px] font-medium text-white tabular-nums sm:text-sm">
-								{nfUS.format(votosA)} votos
+								{nfUS.format(Math.round($votosATweened))} votos
 							</span>
 						</div>
 					{:else}
@@ -129,8 +145,11 @@
 							class="pointer-events-none absolute inset-y-0 z-20 flex items-center"
 							style="left: calc({$leftWidthSpring}% + 6px)"
 						>
-							<span class="px-1 text-[12px] font-medium text-white tabular-nums sm:text-sm">
-								{nfUS.format(votosA)}
+							<span
+								class="rounded-md bg-white px-2 py-0.5 text-[12px] font-semibold tabular-nums sm:text-sm"
+								style="color:{colorA1}; box-shadow:0 1px 0 rgba(0,0,0,.04);"
+							>
+								{nfUS.format(Math.round($votosATweened))}
 							</span>
 						</div>
 					{/if}
@@ -141,7 +160,7 @@
 							style="width:{$rightWidthSpring}%"
 						>
 							<span class="px-1 text-[12px] font-medium text-white tabular-nums sm:text-sm">
-								{nfUS.format(votosB)} votos
+								{nfUS.format(Math.round($votosBTweened))} votos
 							</span>
 						</div>
 					{:else}
@@ -153,7 +172,7 @@
 								class="rounded-md bg-white px-2 py-0.5 text-[12px] font-semibold tabular-nums sm:text-sm"
 								style="color:{colorB1}; box-shadow:0 1px 0 rgba(0,0,0,.04);"
 							>
-								{nfUS.format(votosB)}
+								{nfUS.format(Math.round($votosBTweened))}
 							</span>
 						</div>
 					{/if}

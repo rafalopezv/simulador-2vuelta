@@ -1,10 +1,17 @@
 <script>
-	let tip = false;
-	const openHelp = () => {
-		// aquí disparas tu ayuda/drawer existente
-		const evt = new CustomEvent('open-help');
-		dispatchEvent(evt);
-	};
+	import { tweened } from 'svelte/motion';
+	import { cubicOut } from 'svelte/easing';
+	import { spring } from 'svelte/motion';
+	import { Info } from 'lucide-svelte';
+	import ResetButton from '$lib/components/Reset.svelte';
+	import Help from '$lib/components/Help.svelte';
+
+	const infoScale = spring(1, {
+		stiffness: 0.2,
+		damping: 0.4
+	});
+
+	let infoBtnRef;
 
 	import {
 		partidos,
@@ -15,10 +22,15 @@
 		destinoGlobal,
 		recomputeAll,
 		FINALISTA_A_ID,
-		FINALISTA_B_ID
+		FINALISTA_B_ID,
+		setNuloVotos,
+		redistribucionHistorica,
+		registrarRedistribucion
 	} from '$lib/stores/nuevo';
 	import PartyBar from './Partido.svelte';
 	import { formatAxis } from '$lib/stores/axis.js';
+
+	const LIMITE_INFERIOR_NULO = 241515;
 
 	const nf = new Intl.NumberFormat('en-US');
 	const labelW = '7rem';
@@ -28,10 +40,89 @@
 	$: blancoObj = $blanco ?? { votos: 0, pct: 0 };
 	$: nuloObj = $nulo ?? { votos: 0, pct: 0 };
 
-	// eje fijo: 0 .. 3.5M, ticks cada 500k
-	const axisMax = 3500000;
-	const step = 500000;
-	$: ticks = Array.from({ length: Math.floor(axisMax / step) + 1 }, (_, i) => i * step);
+	$: histNulo = $redistribucionHistorica?.NULO || { a: 0, b: 0, base: $nulo?.baseVotos ?? 0 };
+	$: totalAsignadoNulo = Math.min((histNulo.a ?? 0) + (histNulo.b ?? 0), histNulo.base ?? 0);
+	$: nuloMin = LIMITE_INFERIOR_NULO + totalAsignadoNulo;
+
+	// Dynamic maximum based on current destination and what can be recovered
+	$: nuloMax = (() => {
+		const nuBase = ($nulo?.baseVotos ?? $nulo?.votos) || 0;
+		const currentNulo = $nulo?.votos || 0;
+		const currentDest = $destinoGlobal;
+
+		let maxRecoverableVotes = 0;
+		if (currentDest === 'A') {
+			maxRecoverableVotes = histNulo.a;
+		} else if (currentDest === 'B') {
+			maxRecoverableVotes = histNulo.b;
+		} else {
+			// 'NULO' - split recovery
+			maxRecoverableVotes = Math.min(histNulo.a, histNulo.b) * 2;
+		}
+
+		return Math.min(currentNulo + maxRecoverableVotes, nuBase);
+	})();
+
+	// Dynamic max for each party based on what can be recovered from current destination
+	$: partidosWithDynamicMax = partidosArr.map((p) => {
+		const histParty = $redistribucionHistorica?.[p.id] || { a: 0, b: 0, base: p.baseVotos || 0 };
+		const currentDest = $destinoGlobal;
+		const currentVotes = p.votos || 0;
+		const baseVotes = p.baseVotos || currentVotes;
+
+		let maxRecoverableVotes = 0;
+		if (currentDest === 'A') {
+			maxRecoverableVotes = histParty.a;
+		} else if (currentDest === 'B') {
+			maxRecoverableVotes = histParty.b;
+		} else {
+			// 'NULO' - split recovery
+			maxRecoverableVotes = Math.min(histParty.a, histParty.b) * 2;
+		}
+
+		// For special parties (PDC, LIB), allow above baseline
+		const dynamicMax =
+			p.id === 'PDC' || p.id === 'LIB'
+				? axisMax
+				: Math.min(currentVotes + maxRecoverableVotes, baseVotes);
+
+		return {
+			...p,
+			dynamicMax
+		};
+	});
+
+	// Dynamic axis with smooth animation (like bar chart race)
+	const BASE_AXIS_MAX = 2500000;
+	const STEP = 500000;
+	const GROWTH_THRESHOLD = 0.85; // When bar reaches 85% of axis, start growing
+
+	// Tweened axis for smooth scaling
+	const axisMaxTweened = tweened(BASE_AXIS_MAX, {
+		duration: 600,
+		easing: cubicOut
+	});
+
+	// Calculate dynamic axis based on max party value
+	$: {
+		const maxVotos = Math.max(...partidosArr.map((p) => p.votos || 0));
+		const currentAxisMax = $axisMaxTweened;
+
+		// If any bar exceeds threshold, grow the axis
+		if (maxVotos > currentAxisMax * GROWTH_THRESHOLD) {
+			// Round up to next step interval
+			const newMax = Math.ceil(maxVotos / STEP) * STEP + STEP;
+			axisMaxTweened.set(Math.max(newMax, BASE_AXIS_MAX));
+		}
+		// Shrink back if possible (but not below base)
+		else if (maxVotos < currentAxisMax * 0.7 && currentAxisMax > BASE_AXIS_MAX) {
+			const newMax = Math.ceil(maxVotos / STEP) * STEP + STEP;
+			axisMaxTweened.set(Math.max(newMax, BASE_AXIS_MAX));
+		}
+	}
+
+	$: axisMax = $axisMaxTweened;
+	$: ticks = Array.from({ length: Math.floor(axisMax / STEP) + 1 }, (_, i) => i * STEP);
 
 	// — helpers —
 	function transferToDestino(next, amount) {
@@ -60,12 +151,50 @@
 			const i = next.findIndex((p) => p.name === name);
 			if (i === -1) return arr;
 
+			const party = arr[i];
+			const partyId = party.id;
 			const prevV = next[i].votos || 0;
-			const delta = newV - prevV;
+			const baseV = party.baseVotos || prevV;
+			const delta = newV - prevV; // positive = recovering (drag right), negative = assigning (drag left)
+
 			if (delta === 0) return arr;
 
-			next[i].votos = newV;
-			transferToDestino(next, -delta);
+			let finalVotos = newV;
+
+			// If recovering (dragging right)
+			if (delta > 0) {
+				const histParty = $redistribucionHistorica?.[partyId] || { a: 0, b: 0, base: baseV };
+				const currentDest = $destinoGlobal;
+
+				let maxRecovery = 0;
+
+				// Calculate maximum recoverable votes based on currently selected destination
+				if (currentDest === 'A') {
+					maxRecovery = histParty.a; // Can only recover what A has
+				} else if (currentDest === 'B') {
+					maxRecovery = histParty.b; // Can only recover what B has
+				} else {
+					// 'NULO' - split recovery, both must have votes
+					maxRecovery = Math.min(histParty.a, histParty.b) * 2;
+				}
+
+				// Constrain recovery to available votes from selected finalist
+				const allowedDelta = Math.min(delta, maxRecovery);
+				finalVotos = prevV + allowedDelta;
+			} else {
+				// Assigning votes (dragging left) - allow reduction to 0 (or baseVotos for special parties)
+				finalVotos = Math.max(0, Math.min(newV, baseV));
+			}
+
+			const actualDelta = finalVotos - prevV;
+
+			// Register redistribution if votes changed
+			if (actualDelta !== 0) {
+				registrarRedistribucion(partyId, baseV, actualDelta);
+			}
+
+			next[i].votos = finalVotos;
+			transferToDestino(next, -actualDelta);
 			return next;
 		});
 		recomputeAll();
@@ -80,14 +209,45 @@
 		const emi = $emitidos || 0;
 		const bl = $blanco?.votos || 0;
 		const nuBase = ($nulo?.baseVotos ?? $nulo?.votos) || 0;
-		const minNulo = Math.round(emi * 0.035);
+
+		// Get current redistribution state
+		const histNulo = $redistribucionHistorica?.NULO || { a: 0, b: 0, base: nuBase };
+		const currentDest = $destinoGlobal;
 
 		const raw = e.detail.votos || 0;
-		const v = Math.max(minNulo, Math.min(raw, nuBase));
+		const currentNulo = $nulo?.votos || 0;
+		const delta = raw - currentNulo; // positive = recovering (drag right), negative = assigning (drag left)
 
-		nulo.set({ ...$nulo, votos: v, pct: emi ? (100 * v) / emi : 0 });
+		let finalVotos = raw;
 
-		const validTarget = Math.max(0, emi - bl - v);
+		// If recovering (dragging right)
+		if (delta > 0) {
+			let maxRecovery = 0;
+
+			// Calculate maximum recoverable votes based on currently selected destination
+			if (currentDest === 'A') {
+				maxRecovery = histNulo.a; // Can only recover what A has
+			} else if (currentDest === 'B') {
+				maxRecovery = histNulo.b; // Can only recover what B has
+			} else {
+				// 'NULO' - split recovery, both must have votes
+				maxRecovery = Math.min(histNulo.a, histNulo.b) * 2;
+			}
+
+			// Constrain recovery to available votes from selected finalist
+			const allowedDelta = Math.min(delta, maxRecovery);
+			finalVotos = currentNulo + allowedDelta;
+		} else {
+			// Assigning votes (dragging left) - constrain to minimum
+			const minNulo = LIMITE_INFERIOR_NULO;
+			finalVotos = Math.max(minNulo, Math.min(raw, nuBase));
+		}
+
+		// Apply the final vote count
+		setNuloVotos(finalVotos);
+
+		// Update valid target and redistribute
+		const validTarget = Math.max(0, emi - bl - finalVotos);
 		const currentSum = ($partidos || []).reduce((s, p) => s + (p.votos || 0), 0);
 		const shortage = validTarget - currentSum;
 
@@ -106,23 +266,19 @@
 
 <section class="w-full">
 	<div
-		class="min-h-[560px] rounded-xl border-gray-200 bg-white p-2.5 shadow-sm sm:p-3 md:min-h-[640px]"
+		class="relative min-h-[560px] rounded-xl border-gray-200 bg-white p-2.5 shadow-sm sm:p-3 md:min-h-[640px]"
 	>
+		<!-- Botones en esquina superior -->
+		<div class="absolute top-2 right-2 z-20 flex items-center gap-2">
+			<Help inline={true} />
+			<ResetButton />
+		</div>
+
 		<!-- Bloque de títulos coordinados -->
 		<div class="mb-4 space-y-1 text-center">
 			<h3 class="text-base font-semibold text-gray-800 sm:text-lg">
 				Resultados por partido (1ª vuelta)
 			</h3>
-
-			<div class="flex items-center justify-center gap-2 text-gray-600">
-				<img src="/info.svg" alt="" class="h-4 w-4 opacity-80" />
-				<h3 class="text-[11px] leading-snug font-semibold sm:text-sm">
-					<span class="hidden sm:inline">
-						Arrastra una barra: los cambios se reflejan arriba, en tiempo real
-					</span>
-					<span class="sm:hidden">Arrastra una barra para ver el cambio arriba</span>
-				</h3>
-			</div>
 		</div>
 
 		<div class="relative" style="--label-w: {labelW};">
@@ -140,7 +296,7 @@
 
 			<!-- barras -->
 			<div class="relative z-10 space-y-2 sm:space-y-2.5">
-				{#each partidosArr as p, i}
+				{#each partidosWithDynamicMax as p, i}
 					<PartyBar
 						name={p.name}
 						color={p.color}
@@ -155,7 +311,7 @@
 						baseVotos={p.baseVotos}
 						allowAboveBaseline={p.id === 'PDC' || p.id === 'LIB'}
 						minVotos={0}
-						maxVotos={p.id === 'PDC' || p.id === 'LIB' ? axisMax : (p.baseVotos ?? p.votos)}
+						maxVotos={p.dynamicMax}
 					/>
 				{/each}
 
@@ -167,8 +323,8 @@
 						pct={nuloObj.pct}
 						{axisMax}
 						baseVotos={nuloObj.baseVotos ?? nuloObj.votos}
-						minVotos={Math.round(($emitidos || 0) * 0.035)}
-						maxVotos={nuloObj.baseVotos ?? nuloObj.votos}
+						minVotos={LIMITE_INFERIOR_NULO}
+						maxVotos={nuloMax}
 						allowAboveBaseline={false}
 						draggable={true}
 						staggerIndex={partidosArr.length}

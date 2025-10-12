@@ -3,11 +3,8 @@
 	import HeaderTermometro from '$lib/components/HeaderTermometro.svelte';
 	import BarPanel from '$lib/components/BarPanel.svelte';
 	import SidebarPanel from '$lib/components/SideBarPanel.svelte';
-	import Help from '$lib/components/Help.svelte';
 	let showDrawer = false;
 </script>
-
-<Help />
 
 <!-- Contenedor de página: ocupa 100% del alto y centra el bloque -->
 <div class="min-h-dvh bg-[#F5f5f7] text-gray-900">

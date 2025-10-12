@@ -3,11 +3,8 @@
 	import BarPanel from '$lib/components/BarPanel.svelte';
 	import SidebarPanel from '$lib/components/SideBarPanel.svelte';
 	import Reset from '$lib/components/Reset.svelte';
-	import Help from '$lib/components/Help.svelte';
 	let showDrawer = false;
 </script>
-
-<Help />
 
 <div class="min-h-screen bg-[#F8FAFC] text-gray-900">
 	<!-- Contenedor centrado vertical/horizontal -->

@@ -1,59 +1,78 @@
 <script>
 	import { fade } from 'svelte/transition';
 	import { cubicOut } from 'svelte/easing';
-	import { Mail } from 'lucide-svelte';
+	import { spring } from 'svelte/motion';
+	import { Mail, Info } from 'lucide-svelte';
+
+	export let inline = false; // If true, only shows button without fixed positioning
 
 	let open = false;
 
 	const DUR_OVERLAY = 160;
 	const DUR_DRAWER = 220;
 
+	const scale = spring(1, {
+		stiffness: 0.2,
+		damping: 0.4
+	});
+
+	let btnRef;
+
 	function onKeydown(e) {
 		if (e.key === 'Escape') open = false;
+	}
+
+	function openDrawer() {
+		open = true;
+		setTimeout(() => btnRef?.blur(), 150);
 	}
 </script>
 
 <svelte:window on:keydown={onKeydown} />
 
-<!-- Botón flotante de ayuda -->
-<div class="fixed top-4 right-4 z-50 sm:top-6">
+<!-- Botón de ayuda -->
+<div class="group relative inline-block">
 	<button
-		on:click={() => (open = true)}
-		class="relative flex h-[27px] w-[27px] cursor-pointer items-center justify-center
-             rounded-full bg-[#333333] shadow-md ring-1 ring-gray-200
-             transition-transform duration-200
-             hover:scale-105 hover:shadow-lg
-             focus:outline-none focus-visible:ring-2 focus-visible:ring-gray-400
-             active:scale-95"
+		bind:this={btnRef}
+		on:mousedown={() => scale.set(0.85)}
+		on:mouseup={() => scale.set(1)}
+		on:mouseleave={() => scale.set(1)}
+		on:click={openDrawer}
+		class="flex h-10 w-10 cursor-pointer items-center justify-center rounded-full border border-gray-200
+		       bg-white shadow-sm transition hover:bg-gray-50 focus:outline-none"
+		style="transform: scale({$scale});"
 		aria-label="Ayuda"
-		title="Cómo usar"
 	>
-		<!-- Capas decorativas -->
-		<span
-			class="pointer-events-none absolute inset-0 grid cursor-pointer place-items-center"
-			aria-hidden="true"
-		>
-			<span class="h-3 w-3 cursor-pointer rounded-full bg-white"></span>
-			<span class="absolute h-6 w-6 cursor-pointer rounded-full bg-white"></span>
-		</span>
-
-		<!-- Icono -->
-		<img src="/info.svg" alt="info" class="relative z-10 h-[22px] w-[22px]" />
+		<Info class="h-5 w-5 text-gray-700" />
 	</button>
+
+	<!-- Tooltip -->
+	<div
+		class="pointer-events-none absolute -top-10 left-1/2 -translate-x-1/2 rounded-md bg-gray-900
+		       px-2.5 py-1 text-xs font-medium whitespace-nowrap text-white opacity-0
+		       shadow-md transition group-focus-within:opacity-100 group-hover:opacity-100"
+	>
+		Cómo usar
+		<div
+			class="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-gray-900"
+		></div>
+	</div>
 </div>
 
 {#if open}
 	<!-- Contenedor modal -->
 	<div class="fixed inset-0 z-[60] flex" aria-modal="true" role="dialog">
 		<!-- Overlay -->
-		<div
-			class="absolute inset-0 bg-black/40"
+		<button
+			class="absolute inset-0 bg-black/40 cursor-default"
 			on:click={() => (open = false)}
 			transition:fade={{ duration: DUR_OVERLAY, easing: cubicOut }}
-		/>
+			aria-label="Cerrar"
+			tabindex="-1"
+		></button>
 
 		<!-- Drawer con scroll interno -->
-		<aside
+		<div
 			role="dialog"
 			aria-label="Ayuda del simulador"
 			class="relative ml-auto flex h-full w-full max-w-md flex-col bg-white shadow-xl ring-1 ring-gray-200 sm:max-w-sm"
@@ -162,6 +181,6 @@
 					</div>
 				</section>
 			</div>
-		</aside>
+		</div>
 	</div>
 {/if}

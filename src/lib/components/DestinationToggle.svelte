@@ -24,8 +24,6 @@
 		>
 			PDC
 		</button>
-		<!-- Tooltip -->
-		<div class="tooltip">Tooltip demo</div>
 	</div>
 
 	<!-- Botón rojo-salmon (derecha ahora setea B) -->
@@ -36,8 +34,6 @@
 		>
 			LIBRE
 		</button>
-		<!-- Tooltip -->
-		<div class="tooltip">Tooltip demo</div>
 	</div>
 </div>
 
@@ -123,40 +119,11 @@
 			inset 0 0 0 1px #d45a56,
 			inset 0 0 0 1px rgba(255, 255, 255, 0.15),
 			0 1px 3px 1px rgba(0, 0, 0, 0.3);
-		background-color: #f06b66;
+		background-color: #f28682;
 		color: #fff;
 	}
 
 	/* --- Tooltip elegante --- */
-	.tooltip {
-		position: absolute;
-		bottom: 110%; /* sobre el botón */
-		left: 50%;
-		transform: translateX(-50%) translateY(10px);
-		background: rgba(0, 0, 0, 0.85);
-		color: #fff;
-		padding: 4px 8px;
-		border-radius: 6px;
-		font-size: 12px;
-		white-space: nowrap;
-		opacity: 0;
-		pointer-events: none;
-		transition:
-			opacity 180ms ease,
-			transform 180ms ease;
-	}
-
-	/* Flecha del tooltip */
-	.tooltip::after {
-		content: '';
-		position: absolute;
-		top: 100%;
-		left: 50%;
-		margin-left: -4px;
-		border-width: 4px;
-		border-style: solid;
-		border-color: rgba(0, 0, 0, 0.85) transparent transparent transparent;
-	}
 
 	.btn3d:focus {
 		outline: none;

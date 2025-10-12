@@ -1,5 +1,6 @@
 // src/lib/stores/nuevo.js
 import { writable, get } from 'svelte/store';
+import { derived } from 'svelte/store';
 
 /* ----------------------------- IDs finalistas ----------------------------- */
 export const FINALISTA_A_ID = 'PDC';
@@ -10,15 +11,16 @@ export const destinoGlobal = writable('B'); // 'A' | 'B' | 'NULO'
 
 /* ------------------------------ Colores party ----------------------------- */
 const COLOR_MAP = {
-	AP: '#66BEE5',
-	LYP: '#444444',
-	APB: '#8E66C4',
-	LIB: '#F06B66',
-	FP: '#A9E4F3',
-	MAS: '#3E5FA8',
-	UNI: '#F6C95C',
-	PDC: '#4AA5A3'
+	AP: '#80C7E7',
+	LYP: '#555555',
+	APB: '#9F7CCB',
+	LIB: '#F28682',
+	FP: '#B8E8F5',
+	MAS: '#5371B8',
+	UNI: '#F7D378',
+	PDC: '#60B0AE'
 };
+
 const PARTY_NAME = {
 	AP: 'AP',
 	LYP: 'LYP ADN',
@@ -31,7 +33,6 @@ const PARTY_NAME = {
 };
 
 /* --------------------------- Valores “de fábrica” ------------------------- */
-/** OJO: si cambias los “valores de fábrica”, hazlo aquí */
 const FACTORY = {
 	habilitados: 7936515,
 	emitidos: 6900418,
@@ -78,14 +79,12 @@ const FACTORY = {
 };
 
 /* --------------------------- Datos base (writables) ----------------------- */
-// Estado visible (mutable)
 export const habilitados = writable(FACTORY.habilitados);
 export const emitidos = writable(FACTORY.emitidos);
 export const blanco = writable({ ...FACTORY.blanco });
 export const nulo = writable({ ...FACTORY.nulo });
 export const partidos = writable(FACTORY.partidos.map((p) => ({ ...p })));
 
-// KPIs / termómetro
 export const kpis = writable({
 	validos: { votos: 0, pctEmit: 0 },
 	emitidos: { votos: 0, pctHabilitados: 0 },
@@ -95,10 +94,9 @@ export const kpis = writable({
 export const pctA_valid = writable(0);
 export const pctB_valid = writable(0);
 
-// Scope actual + cache DB + baseline por scope para reset
-export const currentScopeId = writable('BOL'); // por defecto Bolivia (ajústalo si tu JSON usa otro id)
-let DB = null; // cache del JSON (array)
-let SCOPE_BASELINE = null; // snapshot del baseline del último loadScope
+export const currentScopeId = writable('BOL');
+let DB = null;
+let SCOPE_BASELINE = null;
 
 /* ------------------------------ Utilidades -------------------------------- */
 function clamp(v, a, b) {
@@ -119,7 +117,6 @@ export function recomputeAll() {
 	const _nu = get(nulo)?.votos || 0;
 	const _part = get(partidos);
 
-	// válidos = emitidos - blanco - nulo
 	const validTarget = Math.max(0, _emi - _bl - _nu);
 	const safeValid = validTarget || 1;
 
@@ -147,62 +144,86 @@ export function recomputeAll() {
 
 /* ----------------------- Setters usados por la UI ------------------------- */
 export function setPartidoVotos(name, votos) {
-	partidos.update((arr) => arr.map((p) => (p.name === name ? { ...p, votos } : p)));
+	partidos.update((arr) => {
+		const next = arr.map((p) => ({ ...p }));
+		const i = next.findIndex((p) => p.name === name);
+		if (i === -1) return arr;
+
+		const prevV = next[i].votos || 0;
+		const delta = prevV - votos; // votos liberados al arrastrar hacia A o B
+
+		// Registra solo cuando libera (si querés simetría completa, lo extendemos luego)
+		if (delta > 0) {
+			registrarRedistribucion(next[i].id, next[i].baseVotos, -delta); // -delta => asignación
+		}
+
+		next[i].votos = votos;
+		return next;
+	});
 	recomputeAll();
 }
 
-/**
- * Cuando arrastras Nulo:
- *  - delta = nuevoNulo - viejoNulo
- *  - delta < 0 (baja nulo): añadimos |delta| a destino (A / B / NULO => mitad/mitad)
- *  - delta > 0 (sube nulo): restamos delta desde destino (sin dejar negativos)
- */
+/* ---------------------- Reglas de redistribución NULO --------------------- */
+const LIMITE_INFERIOR_NULO = 241515; // no puede bajar más allá de esto
+
 export function setNuloVotos(nextVotosRaw) {
 	const _emi = get(emitidos) || 0;
 	const _nuObj = get(nulo);
 	const _dest = get(destinoGlobal); // 'A' | 'B' | 'NULO'
+	const _hist = get(redistribucionHistorica);
+	const base = _nuObj?.baseVotos || 0;
 
 	const prev = _nuObj?.votos || 0;
-	const next = Math.max(0, +nextVotosRaw || 0);
-	const delta = next - prev; // + sube Nulo, - baja Nulo
+	let next = Math.max(0, +nextVotosRaw || 0);
 
-	// Actualiza Nulo (pct sobre emitidos)
-	nulo.set({ ..._nuObj, votos: next, pct: safePct(next, _emi) });
+	// rango permitido para NULO
+	const nuloMin = LIMITE_INFERIOR_NULO;
+	const nuloMax = base;
+	next = clamp(next, nuloMin, nuloMax);
 
-	// Ajuste de partidos según destino
-	if (delta !== 0) {
-		partidos.update((arr) => {
-			const idxA = findIdx(arr, FINALISTA_A_ID);
-			const idxB = findIdx(arr, FINALISTA_B_ID);
-			if (idxA === -1 || idxB === -1) return arr;
+	const delta = next - prev; // + sube Nulo (recupera), - baja Nulo (asigna)
+	if (delta === 0) return;
 
-			const adj = (index, d) => {
-				if (index < 0 || d === 0) return;
-				const p = arr[index];
-				const nv = clamp((p.votos || 0) + d, 0, Number.POSITIVE_INFINITY);
-				arr[index] = { ...p, votos: nv };
-			};
+	// Actualiza NULO (con pct sobre emitidos)
+	nulo.set({
+		..._nuObj,
+		votos: next,
+		pct: safePct(next, _emi)
+	});
 
-			if (_dest === 'A') {
-				adj(idxA, -delta); // si Nulo baja (delta<0), -delta es positivo => suma a A
-			} else if (_dest === 'B') {
-				adj(idxB, -delta);
-			} else {
-				// 'NULO' => reparte entre A y B
-				adj(idxA, -delta / 2);
-				adj(idxB, -delta / 2);
-			}
-			return arr;
-		});
-	}
+	// Registrar redistribución (respetando topes y no-negativos)
+	registrarRedistribucion('NULO', base, delta);
+
+	// Efecto visual inmediato en finalistas
+	partidos.update((arr) => {
+		const idxA = findIdx(arr, FINALISTA_A_ID);
+		const idxB = findIdx(arr, FINALISTA_B_ID);
+		if (idxA === -1 || idxB === -1) return arr;
+
+		const adj = (index, d) => {
+			if (index < 0 || d === 0) return;
+			const p = arr[index];
+			const nv = clamp((p.votos || 0) + d, 0, Number.POSITIVE_INFINITY);
+			arr[index] = { ...p, votos: nv };
+		};
+
+		if (_dest === 'A') {
+			adj(idxA, -delta);
+		} else if (_dest === 'B') {
+			adj(idxB, -delta);
+		} else {
+			adj(idxA, -delta / 2);
+			adj(idxB, -delta / 2);
+		}
+		return arr;
+	});
 
 	recomputeAll();
 }
 
 /* --------------------------------- RESET ---------------------------------- */
-/** Reset a valores “de fábrica” (los del archivo FACTORY, no del scope cargado) */
 export function resetAllStores() {
-	destinoGlobal.set('A');
+	destinoGlobal.set('B');
 
 	habilitados.set(FACTORY.habilitados);
 	emitidos.set(FACTORY.emitidos);
@@ -210,10 +231,13 @@ export function resetAllStores() {
 	nulo.set({ ...FACTORY.nulo });
 
 	partidos.set(FACTORY.partidos.map((p) => ({ ...p })));
+
+	// 🔄 limpiar histórico al resetear
+	redistribucionHistorica.set({});
+
 	recomputeAll();
 }
 
-/** Reset al baseline del *scope* actualmente cargado (si existe snapshot) */
 export function resetToScopeBaseline() {
 	if (!SCOPE_BASELINE) return;
 	const b = SCOPE_BASELINE;
@@ -224,6 +248,10 @@ export function resetToScopeBaseline() {
 	blanco.set({ ...b.blanco });
 	nulo.set({ ...b.nulo });
 	partidos.set(b.partidos.map((p) => ({ ...p })));
+
+	// 🔄 limpiar histórico al resetear al scope
+	redistribucionHistorica.set({});
+
 	recomputeAll();
 }
 
@@ -236,11 +264,10 @@ async function loadDB() {
 	return DB;
 }
 
-/** Convierte filas (mismo nodo_id) a estado de stores */
 function buildFromRows(rows) {
 	if (!rows || rows.length === 0) return null;
 
-	const base = rows[0]; // habilitados / emitidos / blanco / nulo / validos iguales en todas las filas del nodo
+	const base = rows[0];
 	const emi = +base.emitidos || 0;
 	const val = +base.validos || Math.max(0, emi - (+base.blanco || 0) - (+base.nulo || 0)) || 1;
 
@@ -269,10 +296,6 @@ function buildFromRows(rows) {
 	};
 }
 
-/**
- * Carga un scope por nodo_id: ej. "BOL", "DEP-LP", "CAP-LP-LPZ", "NO-CAP-SC-SCZ", "EXT-ARG", etc.
- * Deja un snapshot (SCOPE_BASELINE) para poder hacer reset al baseline de ese scope.
- */
 export async function loadScope(nodo_id = 'BOL') {
 	const db = await loadDB();
 
@@ -285,10 +308,8 @@ export async function loadScope(nodo_id = 'BOL') {
 	const state = buildFromRows(rows);
 	if (!state) return;
 
-	// set snapshot baseline del scope
 	SCOPE_BASELINE = JSON.parse(JSON.stringify(state));
 
-	// aplicar a stores
 	currentScopeId.set(nodo_id);
 	destinoGlobal.set('A');
 
@@ -298,7 +319,47 @@ export async function loadScope(nodo_id = 'BOL') {
 	nulo.set({ ...state.nulo });
 	partidos.set(state.partidos.map((p) => ({ ...p })));
 
+	// 🔄 limpiar histórico al cargar un scope nuevo
+	redistribucionHistorica.set({});
+
 	recomputeAll();
+}
+
+/* -------------------- Histórico de redistribución ------------------------- */
+export const redistribucionHistorica = writable({});
+
+/**
+ * Registrar una redistribución desde una fuente (NULO u otro partido)
+ * @param {string} id   - 'NULO' o id de partido
+ * @param {number} base - votos base (100%)
+ * @param {number} delta - cambio de votos:  delta < 0 asigna desde la fuente; delta > 0 devuelve a la fuente
+ */
+export function registrarRedistribucion(id, base, delta) {
+	const destino = get(destinoGlobal); // 'A' | 'B' | 'NULO'
+	const limiteInferior = 241515;
+	const baseAjustada = id === 'NULO' ? base - limiteInferior : base;
+
+	redistribucionHistorica.update((acc) => {
+		const entry = acc[id] || { base: baseAjustada, a: 0, b: 0 };
+
+		// Si estamos devolviendo votos (delta > 0) → restar al partido activo
+		// Si estamos asignando votos (delta < 0) → sumar al partido activo
+		if (destino === 'A') {
+			entry.a -= delta; // delta negativo = suma / delta positivo = resta
+			entry.a = Math.max(0, Math.min(entry.a, baseAjustada));
+		} else if (destino === 'B') {
+			entry.b -= delta;
+			entry.b = Math.max(0, Math.min(entry.b, baseAjustada));
+		} else {
+			entry.a -= delta / 2;
+			entry.b -= delta / 2;
+			entry.a = Math.max(0, Math.min(entry.a, baseAjustada));
+			entry.b = Math.max(0, Math.min(entry.b, baseAjustada));
+		}
+
+		acc[id] = entry;
+		return { ...acc };
+	});
 }
 
 /* --------------------- Inicializa porcentajes al cargar ------------------- */

@@ -5,12 +5,13 @@
 	import DestinationToggle from '$lib/components/DestinationToggle.svelte';
 	import KPI from '$lib/components/KPI.svelte';
 	import Reset from '$lib/components/Reset.svelte';
+	import EstadoReparto from '$lib/components/EstadoReparto.svelte';
 
 	let advancedOpen = false;
 </script>
 
 <div class="space-y-5">
-	<Reset />
+	<!-- <Reset /> -->
 
 	<!-- <div class="rounded-2xl bg-white p-3 ring-1 ring-gray-200 sm:p-4">
 		<DestinationToggle />
@@ -44,5 +45,7 @@
 	<!-- Destino: siempre visible -->
 
 	<!-- KPI: siempre visible -->
+
 	<KPI />
+	<EstadoReparto />
 </div>
