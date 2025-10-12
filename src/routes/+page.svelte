@@ -266,7 +266,7 @@
 		<!-- CTA -->
 		<div class="mt-8 flex justify-center">
 			<a
-				href="/test"
+				href="/sim"
 				class="inline-flex cursor-pointer items-center gap-2 rounded-[5px] bg-gray-800 px-6 py-3 text-base font-semibold text-white shadow-sm transition hover:bg-gray-900 focus:outline-none focus-visible:ring-2 focus-visible:ring-gray-400 active:scale-[0.99]"
 			>
 				Comenzar

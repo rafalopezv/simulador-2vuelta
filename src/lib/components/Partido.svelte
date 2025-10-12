@@ -89,9 +89,9 @@
 	});
 </script>
 
-<div class="grid items-center gap-3" style="grid-template-columns: 7rem 1fr;">
+<div class="grid items-center gap-1" style="grid-template-columns: 5rem 1fr;">
 	<!-- Nombre -->
-	<div class="w-full truncate pr-1 text-right text-xs font-medium text-gray-800 sm:text-sm">
+	<div class="w-full truncate pr-0.5 text-right text-xs font-medium text-gray-800 sm:text-sm">
 		{name}
 	</div>
 
@@ -111,8 +111,8 @@
 				transform: translate(6px, -50%);
 			"
 		>
-			<div class="font-semibold text-gray-900">{nfPctBig.format($pctTween)}%</div>
-			<div class="text-sm text-gray-500">{nfInt.format($votosTween)}</div>
+			<div class="text-xs font-semibold text-gray-900 sm:text-sm">{nfPctBig.format($pctTween)}%</div>
+			<div class="text-[10px] text-gray-500 sm:text-xs">{nfInt.format($votosTween)}</div>
 		</div>
 
 		<!-- capa interactiva -->

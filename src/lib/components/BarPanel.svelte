@@ -33,7 +33,7 @@
 	const LIMITE_INFERIOR_NULO = 241515;
 
 	const nf = new Intl.NumberFormat('en-US');
-	const labelW = '7rem';
+	const labelW = '5rem'; // Reduced from 7rem for mobile space saving
 
 	// datos reactivos
 	$: partidosArr = Array.isArray($partidos) ? $partidos : [];
@@ -266,10 +266,10 @@
 
 <section class="w-full">
 	<div
-		class="relative min-h-[560px] rounded-xl border-gray-200 bg-white p-2.5 shadow-sm sm:p-3 md:min-h-[640px]"
+		class="relative min-h-[560px] rounded-xl border-gray-200 bg-white p-2 shadow-sm sm:p-3 md:min-h-[640px]"
 	>
-		<!-- Botones en esquina superior -->
-		<div class="absolute top-2 right-2 z-20 flex items-center gap-2">
+		<!-- Botones en esquina superior (desktop) o bottom fixed (mobile) -->
+		<div class="absolute top-2 right-2 z-20 hidden items-center gap-2 sm:flex">
 			<Help inline={true} />
 			<ResetButton />
 		</div>
@@ -283,7 +283,7 @@
 
 		<div class="relative" style="--label-w: {labelW};">
 			<!-- grid del eje detrás de las barras -->
-			<div class="pointer-events-none absolute inset-0 z-0" style="left: calc({labelW} + 0.75rem);">
+			<div class="pointer-events-none absolute inset-0 z-0" style="left: calc({labelW} + 0.25rem);">
 				<div class="relative h-full">
 					{#each ticks as t}
 						<div
@@ -348,7 +348,7 @@
 			<!-- etiquetas -->
 			<div class="mt-3 grid" style="grid-template-columns: {labelW} 1fr;">
 				<div></div>
-				<div class="relative h-5" style="margin-left: 0.75rem;">
+				<div class="relative h-5" style="margin-left: 0.25rem;">
 					{#each ticks as t, i}
 						<span
 							class="absolute text-[10px] text-gray-500 tabular-nums sm:text-xs"

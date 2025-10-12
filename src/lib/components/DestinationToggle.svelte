@@ -40,17 +40,26 @@
 <style>
 	.btn3d {
 		position: relative;
-		top: -6px;
+		top: -4px;
 		border: 0;
 		transition:
 			top 120ms ease,
 			box-shadow 120ms ease,
 			background-color 120ms ease;
-		padding: 10px 28px;
+		padding: 6px 20px;
+		font-size: 0.875rem;
 		font-weight: 600;
 		cursor: pointer;
 		color: #fff;
 		z-index: 1;
+	}
+
+	@media (min-width: 640px) {
+		.btn3d {
+			top: -6px;
+			padding: 10px 28px;
+			font-size: 1rem;
+		}
 	}
 	.btn3d:active,
 	.btn3d.active {
@@ -69,21 +78,39 @@
 
 	/* --- Izquierda turquesa (#4AA5A3) --- */
 	.btn-left-turq {
-		border-top-left-radius: 8px;
-		border-bottom-left-radius: 8px;
+		border-top-left-radius: 6px;
+		border-bottom-left-radius: 6px;
 		background-color: #4aa5a3;
 		box-shadow:
 			inset 0 0 0 1px #3c8f8d,
 			inset 0 0 0 2px rgba(255, 255, 255, 0.15),
-			0 8px 0 0 #367d7b,
-			0 8px 8px 1px rgba(0, 0, 0, 0.4);
+			0 5px 0 0 #367d7b,
+			0 5px 6px 1px rgba(0, 0, 0, 0.4);
 	}
 	.btn-left-turq:not(.active) {
 		box-shadow:
 			inset 0 0 0 1px #d1d5db,
-			0 8px 0 0 #d1d5db,
-			0 8px 8px 1px rgba(0, 0, 0, 0.2),
+			0 5px 0 0 #d1d5db,
+			0 5px 6px 1px rgba(0, 0, 0, 0.2),
 			3px 0 4px rgba(0, 0, 0, 0.25);
+	}
+
+	@media (min-width: 640px) {
+		.btn-left-turq {
+			border-radius: 8px 0 0 8px;
+			box-shadow:
+				inset 0 0 0 1px #3c8f8d,
+				inset 0 0 0 2px rgba(255, 255, 255, 0.15),
+				0 8px 0 0 #367d7b,
+				0 8px 8px 1px rgba(0, 0, 0, 0.4);
+		}
+		.btn-left-turq:not(.active) {
+			box-shadow:
+				inset 0 0 0 1px #d1d5db,
+				0 8px 0 0 #d1d5db,
+				0 8px 8px 1px rgba(0, 0, 0, 0.2),
+				3px 0 4px rgba(0, 0, 0, 0.25);
+		}
 	}
 	.btn-left-turq.active,
 	.btn-left-turq:active {
@@ -97,21 +124,39 @@
 
 	/* --- Derecha rojo-salmon (#F06B66) --- */
 	.btn-right-red {
-		border-top-right-radius: 8px;
-		border-bottom-right-radius: 8px;
+		border-top-right-radius: 6px;
+		border-bottom-right-radius: 6px;
 		background-color: #f06b66;
 		box-shadow:
 			inset 0 0 0 1px #d45a56,
 			inset 0 0 0 2px rgba(255, 255, 255, 0.15),
-			0 8px 0 0 #c24b47,
-			0 8px 8px 1px rgba(0, 0, 0, 0.4);
+			0 5px 0 0 #c24b47,
+			0 5px 6px 1px rgba(0, 0, 0, 0.4);
 	}
 	.btn-right-red:not(.active) {
 		box-shadow:
 			inset 0 0 0 1px #d1d5db,
-			0 8px 0 0 #d1d5db,
-			0 8px 8px 1px rgba(0, 0, 0, 0.2),
+			0 5px 0 0 #d1d5db,
+			0 5px 6px 1px rgba(0, 0, 0, 0.2),
 			-3px 0 4px rgba(0, 0, 0, 0.25);
+	}
+
+	@media (min-width: 640px) {
+		.btn-right-red {
+			border-radius: 0 8px 8px 0;
+			box-shadow:
+				inset 0 0 0 1px #d45a56,
+				inset 0 0 0 2px rgba(255, 255, 255, 0.15),
+				0 8px 0 0 #c24b47,
+				0 8px 8px 1px rgba(0, 0, 0, 0.4);
+		}
+		.btn-right-red:not(.active) {
+			box-shadow:
+				inset 0 0 0 1px #d1d5db,
+				0 8px 0 0 #d1d5db,
+				0 8px 8px 1px rgba(0, 0, 0, 0.2),
+				-3px 0 4px rgba(0, 0, 0, 0.25);
+		}
 	}
 	.btn-right-red.active,
 	.btn-right-red:active {

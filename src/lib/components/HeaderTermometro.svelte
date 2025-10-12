@@ -85,13 +85,18 @@
 
 <section class="w-full">
 	<div class="mx-auto max-w-[1600px]">
-		<div class="rounded-xl bg-white p-3 shadow-sm ring-1 ring-gray-200 sm:px-14 sm:py-4">
+		<div class="rounded-xl bg-white p-2.5 shadow-sm ring-1 ring-gray-200 sm:p-4 sm:px-14 sm:py-4">
 			<div class="relative">
+				<!-- Título centrado -->
+				<div class="mb-2 text-center sm:mb-3">
+					<h3 class="text-sm font-semibold text-gray-800 sm:text-lg">Resultados balotaje</h3>
+				</div>
+
 				<!-- % GRANDES ARRIBA -->
-				<div class="mb-1.5 flex items-end justify-between sm:mb-2">
+				<div class="mb-1 flex items-end justify-between sm:mb-2">
 					<div class="text-left">
 						<div
-							class="translate-y-[2px] text-4xl leading-none font-extrabold tabular-nums sm:text-5xl"
+							class="text-2xl leading-none font-extrabold tabular-nums sm:text-5xl"
 							style="color:{colorA1}"
 						>
 							{$aTweened.toFixed(1)}%
@@ -99,7 +104,7 @@
 					</div>
 					<div class="text-right">
 						<div
-							class="translate-y-[2px] text-4xl leading-none font-extrabold tabular-nums sm:text-5xl"
+							class="text-2xl leading-none font-extrabold tabular-nums sm:text-5xl"
 							style="color:{colorB1}"
 						>
 							{$bTweened.toFixed(1)}%
@@ -107,12 +112,8 @@
 					</div>
 				</div>
 
-				<div class="absolute left-1/2 z-30 -translate-x-1/2 -translate-y-[60px]">
-					<h3 class="text-base font-semibold text-gray-800 sm:text-lg">Resultados balotaje</h3>
-				</div>
-
 				<!-- TERMÓMETRO -->
-				<div class="relative h-12 w-full overflow-hidden rounded-md sm:h-12">
+				<div class="relative h-10 w-full overflow-hidden rounded-md sm:h-12">
 					<!-- riel base -->
 					<div class="absolute inset-0 rounded-md bg-gray-100"></div>
 
@@ -133,20 +134,20 @@
 					<!-- VOTOS DENTRO/AFUERA -->
 					{#if showVotesInsideLeft}
 						<div
-							class="pointer-events-none absolute inset-y-0 left-0 z-20 flex items-center pl-3"
+							class="pointer-events-none absolute inset-y-0 left-0 z-20 flex items-center pl-2 sm:pl-3"
 							style="width:{$leftWidthSpring}%"
 						>
-							<span class="px-1 text-[12px] font-medium text-white tabular-nums sm:text-sm">
+							<span class="px-1 text-[10px] font-medium text-white tabular-nums sm:text-[13px]">
 								{nfUS.format(Math.round($votosATweened))} votos
 							</span>
 						</div>
 					{:else}
 						<div
 							class="pointer-events-none absolute inset-y-0 z-20 flex items-center"
-							style="left: calc({$leftWidthSpring}% + 6px)"
+							style="left: calc({$leftWidthSpring}% + 4px); {$leftWidthSpring > 5 ? 'left: calc(' + $leftWidthSpring + '% + 6px);' : ''}"
 						>
 							<span
-								class="rounded-md bg-white px-2 py-0.5 text-[12px] font-semibold tabular-nums sm:text-sm"
+								class="rounded-md bg-white px-1.5 py-0.5 text-[10px] font-semibold tabular-nums sm:px-2 sm:text-[13px]"
 								style="color:{colorA1}; box-shadow:0 1px 0 rgba(0,0,0,.04);"
 							>
 								{nfUS.format(Math.round($votosATweened))}
@@ -156,20 +157,20 @@
 
 					{#if showVotesInsideRight}
 						<div
-							class="pointer-events-none absolute inset-y-0 right-0 z-20 flex items-center justify-end pr-3"
+							class="pointer-events-none absolute inset-y-0 right-0 z-20 flex items-center justify-end pr-2 sm:pr-3"
 							style="width:{$rightWidthSpring}%"
 						>
-							<span class="px-1 text-[12px] font-medium text-white tabular-nums sm:text-sm">
+							<span class="px-1 text-[10px] font-medium text-white tabular-nums sm:text-[13px]">
 								{nfUS.format(Math.round($votosBTweened))} votos
 							</span>
 						</div>
 					{:else}
 						<div
 							class="pointer-events-none absolute inset-y-0 z-20 flex items-center"
-							style="right: calc({$rightWidthSpring}% + 6px)"
+							style="right: calc({$rightWidthSpring}% + 4px); {$rightWidthSpring > 5 ? 'right: calc(' + $rightWidthSpring + '% + 6px);' : ''}"
 						>
 							<span
-								class="rounded-md bg-white px-2 py-0.5 text-[12px] font-semibold tabular-nums sm:text-sm"
+								class="rounded-md bg-white px-1.5 py-0.5 text-[10px] font-semibold tabular-nums sm:px-2 sm:text-[13px]"
 								style="color:{colorB1}; box-shadow:0 1px 0 rgba(0,0,0,.04);"
 							>
 								{nfUS.format(Math.round($votosBTweened))}
@@ -193,9 +194,9 @@
 				</div>
 
 				<!-- Etiquetas bajo el termómetro -->
-				<div class="relative mt-0 h-12" style="--toggle-w: 48px; --gap: 10px;">
+				<div class="relative mt-0 h-8 sm:h-12" style="--toggle-w: 48px; --gap: 10px;">
 					<div
-						class="absolute top-1/2 left-1/2 mt-2 -translate-x-1/2 -translate-y-1/2 cursor-pointer"
+						class="absolute top-1/2 left-1/2 mt-0 sm:mt-2 -translate-x-1/2 -translate-y-1/2 cursor-pointer"
 					>
 						<DestinationToggle />
 					</div>
