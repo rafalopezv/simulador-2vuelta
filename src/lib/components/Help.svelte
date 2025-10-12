@@ -61,7 +61,7 @@
 
 {#if open}
 	<!-- Contenedor modal -->
-	<div class="fixed inset-0 z-[60] flex" aria-modal="true" role="dialog">
+	<div class="fixed inset-0 z-[70] flex" aria-modal="true" role="dialog">
 		<!-- Overlay -->
 		<button
 			class="absolute inset-0 bg-black/40 cursor-default"

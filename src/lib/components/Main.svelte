@@ -64,11 +64,11 @@
 	{/if}
 
 	<!-- Mobile floating buttons at bottom with backdrop blur -->
-	<div class="fixed bottom-4 right-4 z-50 flex items-center gap-2 sm:hidden">
-		<div class="rounded-xl bg-white/80 p-1.5 shadow-lg backdrop-blur-md">
+	<div class="pointer-events-none fixed bottom-4 right-4 z-50 flex items-center gap-2 sm:hidden">
+		<div class="pointer-events-auto rounded-xl bg-white/80 p-1.5 shadow-lg backdrop-blur-md">
 			<Help inline={true} />
 		</div>
-		<div class="rounded-xl bg-white/80 p-1.5 shadow-lg backdrop-blur-md">
+		<div class="pointer-events-auto rounded-xl bg-white/80 p-1.5 shadow-lg backdrop-blur-md">
 			<Reset />
 		</div>
 	</div>
