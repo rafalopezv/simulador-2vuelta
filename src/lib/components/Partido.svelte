@@ -37,6 +37,9 @@
 		pctTween.set(pct); // porcentaje
 	}
 
+	// Ghost bar (baseline) for visual reference
+	$: baseWidthPct = axisMax ? (baseVotos / axisMax) * 100 : 0;
+
 	let hitEl;
 	let dragging = false;
 	let raf = null;
@@ -97,7 +100,13 @@
 
 	<!-- Barra -->
 	<div class="relative h-10 sm:h-12">
-		<!-- barra -->
+		<!-- Ghost bar (baseline reference) -->
+		<div
+			class="absolute inset-y-1 left-0 rounded-r-md opacity-20"
+			style="background:{color}; width: {baseWidthPct}%;"
+		></div>
+
+		<!-- Actual bar -->
 		<div
 			class="absolute inset-y-1 left-0 rounded-r-md"
 			style="background:{color}; width: {$wPctTween}%;"
@@ -105,7 +114,7 @@
 
 		<!-- Label -->
 		<div
-			class="pointer-events-none absolute top-1/2 rounded-lg bg-white tabular-nums"
+			class="pointer-events-none absolute top-1/2 tabular-nums"
 			style="
 				left: {$wPctTween}%;
 				transform: translate(6px, -50%);
