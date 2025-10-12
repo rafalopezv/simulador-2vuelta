@@ -76,15 +76,15 @@
 		color: #6b7280; /* gris medio para el texto */
 	}
 
-	/* --- Izquierda turquesa (#4AA5A3) --- */
+	/* --- Izquierda turquesa (#3FA09D) --- */
 	.btn-left-turq {
 		border-top-left-radius: 6px;
 		border-bottom-left-radius: 6px;
-		background-color: #4aa5a3;
+		background-color: #3fa09d;
 		box-shadow:
-			inset 0 0 0 1px #3c8f8d,
+			inset 0 0 0 1px #338884,
 			inset 0 0 0 2px rgba(255, 255, 255, 0.15),
-			0 5px 0 0 #367d7b,
+			0 5px 0 0 #2b7370,
 			0 5px 6px 1px rgba(0, 0, 0, 0.4);
 	}
 	.btn-left-turq:not(.active) {
@@ -99,9 +99,9 @@
 		.btn-left-turq {
 			border-radius: 8px 0 0 8px;
 			box-shadow:
-				inset 0 0 0 1px #3c8f8d,
+				inset 0 0 0 1px #338884,
 				inset 0 0 0 2px rgba(255, 255, 255, 0.15),
-				0 8px 0 0 #367d7b,
+				0 8px 0 0 #2b7370,
 				0 8px 8px 1px rgba(0, 0, 0, 0.4);
 		}
 		.btn-left-turq:not(.active) {
@@ -115,22 +115,22 @@
 	.btn-left-turq.active,
 	.btn-left-turq:active {
 		box-shadow:
-			inset 0 0 0 1px #3c8f8d,
+			inset 0 0 0 1px #338884,
 			inset 0 0 0 1px rgba(255, 255, 255, 0.15),
 			0 1px 3px 1px rgba(0, 0, 0, 0.3);
-		background-color: #4aa5a3;
+		background-color: #3fa09d;
 		color: #fff;
 	}
 
-	/* --- Derecha rojo-salmon (#F06B66) --- */
+	/* --- Derecha rojo-salmon (#F05B56) --- */
 	.btn-right-red {
 		border-top-right-radius: 6px;
 		border-bottom-right-radius: 6px;
-		background-color: #f06b66;
+		background-color: #f05b56;
 		box-shadow:
-			inset 0 0 0 1px #d45a56,
+			inset 0 0 0 1px #d64942,
 			inset 0 0 0 2px rgba(255, 255, 255, 0.15),
-			0 5px 0 0 #c24b47,
+			0 5px 0 0 #c13a35,
 			0 5px 6px 1px rgba(0, 0, 0, 0.4);
 	}
 	.btn-right-red:not(.active) {
@@ -145,9 +145,9 @@
 		.btn-right-red {
 			border-radius: 0 8px 8px 0;
 			box-shadow:
-				inset 0 0 0 1px #d45a56,
+				inset 0 0 0 1px #d64942,
 				inset 0 0 0 2px rgba(255, 255, 255, 0.15),
-				0 8px 0 0 #c24b47,
+				0 8px 0 0 #c13a35,
 				0 8px 8px 1px rgba(0, 0, 0, 0.4);
 		}
 		.btn-right-red:not(.active) {
@@ -161,10 +161,10 @@
 	.btn-right-red.active,
 	.btn-right-red:active {
 		box-shadow:
-			inset 0 0 0 1px #d45a56,
+			inset 0 0 0 1px #d64942,
 			inset 0 0 0 1px rgba(255, 255, 255, 0.15),
 			0 1px 3px 1px rgba(0, 0, 0, 0.3);
-		background-color: #f28682;
+		background-color: #f05b56;
 		color: #fff;
 	}
 

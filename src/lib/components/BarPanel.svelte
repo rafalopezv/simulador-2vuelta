@@ -182,8 +182,14 @@
 				const allowedDelta = Math.min(delta, maxRecovery);
 				finalVotos = prevV + allowedDelta;
 			} else {
-				// Assigning votes (dragging left) - allow reduction to 0 (or baseVotos for special parties)
-				finalVotos = Math.max(0, Math.min(newV, baseV));
+				// Assigning votes (dragging left)
+				// For PDC/LIB finalists: allow reduction down to baseVotos (they can transfer to each other)
+				// For other parties: constrain to baseVotos
+				if (partyId === 'PDC' || partyId === 'LIB') {
+					finalVotos = Math.max(baseV, newV);
+				} else {
+					finalVotos = Math.max(0, Math.min(newV, baseV));
+				}
 			}
 
 			const actualDelta = finalVotos - prevV;

@@ -13,12 +13,12 @@
 	import NumberFlow from '@number-flow/svelte';
 	import DestinationToggle from './DestinationToggle.svelte';
 
-	// Colores marca
-	const colorA = '#4AA5A3',
-		colorA1 = '#4AA5A3';
+	// Colores marca (más vibrantes)
+	const colorA = '#3FA09D',
+		colorA1 = '#3FA09D';
 
-	const colorB = '#F06B66',
-		colorB1 = '#F06B66';
+	const colorB = '#F05B56',
+		colorB1 = '#F05B56';
 
 	// % (sobre válidos)
 	$: a = Math.max(0, Math.min(100, +$pctA_valid || 0));
@@ -193,8 +193,8 @@
 					></div>
 				</div>
 
-				<!-- Etiquetas bajo el termómetro -->
-				<div class="relative mt-0 h-8 sm:h-12" style="--toggle-w: 48px; --gap: 10px;">
+				<!-- Etiquetas bajo el termómetro (solo desktop) -->
+				<div class="relative mt-0 hidden h-8 sm:h-12 lg:block" style="--toggle-w: 48px; --gap: 10px;">
 					<div
 						class="absolute top-1/2 left-1/2 mt-0 sm:mt-2 -translate-x-1/2 -translate-y-1/2 cursor-pointer"
 					>

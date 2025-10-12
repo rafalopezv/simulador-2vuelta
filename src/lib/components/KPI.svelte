@@ -138,32 +138,32 @@
 			{nf.format(Math.round($habilitadosTweened))}
 		</div>
 	</div>
-	<!-- Disputables % - destacado con fondo diferente -->
+	<!-- Disputables % - destacado con fondo oscuro -->
 	<div
-		class="flex min-h-24 flex-col items-center justify-center rounded-xl bg-yellow-100 p-3 text-center shadow-sm
-             transition duration-300 ease-out hover:scale-105 hover:shadow-md"
+		class="flex min-h-24 flex-col items-center justify-center rounded-xl bg-[#333333] p-3 text-center shadow-md
+             transition duration-300 ease-out hover:scale-105 hover:shadow-lg"
 	>
-		<div class="text-[11px] font-medium text-yellow-900 sm:text-xs">Votos disputables</div>
-		<div class="text-lg font-semibold text-yellow-800 tabular-nums sm:text-xl">
+		<div class="text-[11px] font-medium text-gray-300 sm:text-xs">Votos disputables</div>
+		<div class="text-lg font-semibold text-white tabular-nums sm:text-xl">
 			{nf1.format($gapPctTweened)}%
 		</div>
-		<div class="text-[11px] text-yellow-700 tabular-nums sm:text-xs">
+		<div class="text-[11px] text-gray-400 tabular-nums sm:text-xs">
 			por asignar
 		</div>
 	</div>
 
-	<!-- Disputables votos - destacado con fondo diferente -->
+	<!-- Disputables votos - destacado con fondo oscuro -->
 	<div
-		class="flex min-h-24 flex-col items-center justify-center rounded-xl bg-yellow-100 p-3 text-center shadow-sm
-             transition duration-300 ease-out hover:scale-105 hover:shadow-md"
+		class="flex min-h-24 flex-col items-center justify-center rounded-xl bg-[#333333] p-3 text-center shadow-md
+             transition duration-300 ease-out hover:scale-105 hover:shadow-lg"
 	>
-		<div class="text-[11px] font-medium text-yellow-900 sm:text-xs">
+		<div class="text-[11px] font-medium text-gray-300 sm:text-xs">
 			Votos sin asignar
 		</div>
-		<div class="text-lg font-semibold text-yellow-800 tabular-nums sm:text-xl">
+		<div class="text-lg font-semibold text-white tabular-nums sm:text-xl">
 			{nf.format(Math.round($gapVotosTweened))}
 		</div>
-		<div class="text-[11px] text-yellow-700 tabular-nums sm:text-xs">
+		<div class="text-[11px] text-gray-400 tabular-nums sm:text-xs">
 			votos
 		</div>
 	</div>

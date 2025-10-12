@@ -11,14 +11,14 @@ export const destinoGlobal = writable('B'); // 'A' | 'B' | 'NULO'
 
 /* ------------------------------ Colores party ----------------------------- */
 const COLOR_MAP = {
-	AP: '#80C7E7',
-	LYP: '#555555',
-	APB: '#9F7CCB',
-	LIB: '#F28682',
-	FP: '#B8E8F5',
-	MAS: '#5371B8',
-	UNI: '#F7D378',
-	PDC: '#60B0AE'
+	AP: '#4DB8E8',
+	LYP: '#444444',
+	APB: '#8B5FC9',
+	LIB: '#F05B56',
+	FP: '#84D8F5',
+	MAS: '#3D5CA4',
+	UNI: '#F5C842',
+	PDC: '#3FA09D'
 };
 
 const PARTY_NAME = {
