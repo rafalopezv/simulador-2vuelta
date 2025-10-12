@@ -87,13 +87,8 @@
 	<div class="mx-auto max-w-[1600px]">
 		<div class="rounded-xl bg-white p-2.5 shadow-sm ring-1 ring-gray-200 sm:p-4 sm:px-14 sm:py-4">
 			<div class="relative">
-				<!-- Título centrado -->
-				<div class="mb-2 text-center sm:mb-3">
-					<h3 class="text-sm font-semibold text-gray-800 sm:text-lg">Resultados balotaje</h3>
-				</div>
-
-				<!-- % GRANDES ARRIBA -->
-				<div class="mb-1 flex items-end justify-between sm:mb-2">
+				<!-- % GRANDES con título centrado en la misma línea -->
+				<div class="mb-1 flex items-center justify-between sm:mb-2">
 					<div class="text-left">
 						<div
 							class="text-2xl leading-none font-extrabold tabular-nums sm:text-5xl"
@@ -102,6 +97,10 @@
 							{$aTweened.toFixed(1)}%
 						</div>
 					</div>
+
+					<!-- Título centrado verticalmente con los % -->
+					<h3 class="text-sm font-semibold text-gray-800 sm:text-lg">Resultados balotaje</h3>
+
 					<div class="text-right">
 						<div
 							class="text-2xl leading-none font-extrabold tabular-nums sm:text-5xl"

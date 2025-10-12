@@ -17,12 +17,26 @@
 	});
 
 	let btnRef;
+	let touchFired = false;
 
 	function onKeydown(e) {
 		if (e.key === 'Escape') open = false;
 	}
 
 	function openDrawer() {
+		if (touchFired) {
+			touchFired = false;
+			return;
+		}
+		open = true;
+		setTimeout(() => btnRef?.blur(), 150);
+	}
+
+	function handleTouch(e) {
+		e.preventDefault();
+		touchFired = true;
+		scale.set(0.85);
+		setTimeout(() => scale.set(1), 200);
 		open = true;
 		setTimeout(() => btnRef?.blur(), 150);
 	}
@@ -37,6 +51,7 @@
 		on:mousedown={() => scale.set(0.85)}
 		on:mouseup={() => scale.set(1)}
 		on:mouseleave={() => scale.set(1)}
+		on:touchend={handleTouch}
 		on:click={openDrawer}
 		class="flex h-10 w-10 cursor-pointer items-center justify-center rounded-full border border-gray-200
 		       bg-white shadow-sm transition hover:bg-gray-50 focus:outline-none"
@@ -46,11 +61,11 @@
 		<Info class="h-5 w-5 text-gray-700" />
 	</button>
 
-	<!-- Tooltip -->
+	<!-- Tooltip (desktop only) -->
 	<div
 		class="pointer-events-none absolute -top-10 left-1/2 -translate-x-1/2 rounded-md bg-gray-900
 		       px-2.5 py-1 text-xs font-medium whitespace-nowrap text-white opacity-0
-		       shadow-md transition group-focus-within:opacity-100 group-hover:opacity-100"
+		       shadow-md transition group-hover:opacity-100 hidden sm:block"
 	>
 		Cómo usar
 		<div

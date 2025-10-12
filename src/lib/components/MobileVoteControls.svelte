@@ -219,6 +219,13 @@
 		accelerationCounterB = 0; // Reset counter
 	}
 
+	// Handle drawer button touch
+	function handleDrawerTouch() {
+		scaleDrawer.set(0.9);
+		setTimeout(() => scaleDrawer.set(1), 200);
+		onOpenDrawer();
+	}
+
 	// Cleanup on destroy
 	import { onDestroy } from 'svelte';
 	onDestroy(() => {
@@ -361,6 +368,7 @@
 			on:mousedown={() => scaleDrawer.set(0.9)}
 			on:mouseup={() => scaleDrawer.set(1)}
 			on:mouseleave={() => scaleDrawer.set(1)}
+			on:touchend|preventDefault={handleDrawerTouch}
 			on:click={onOpenDrawer}
 			class="flex h-14 w-14 items-center justify-center rounded-xl bg-gradient-to-b from-white to-gray-50 shadow-md ring-1 ring-gray-300 transition-all duration-150 hover:shadow-lg active:shadow-sm"
 			style="transform: scale({$scaleDrawer});"

@@ -99,7 +99,7 @@
 	</div>
 
 	<!-- Barra -->
-	<div class="relative h-10 sm:h-12">
+	<div class="relative h-12 sm:h-13">
 		<!-- Ghost bar (baseline reference) -->
 		<div
 			class="absolute inset-y-1 left-0 rounded-r-md opacity-20"

@@ -5,6 +5,7 @@
 	import { Info } from 'lucide-svelte';
 	import ResetButton from '$lib/components/Reset.svelte';
 	import Help from '$lib/components/Help.svelte';
+	import DragDemo from '$lib/components/DragDemo.svelte';
 
 	const infoScale = spring(1, {
 		stiffness: 0.2,
@@ -268,6 +269,90 @@
 	function onChangeNulo(e) {
 		onDragNulo(e);
 	}
+
+	// Demo animation state
+	let isDemoPlaying = false;
+	let demoPhase = 0; // 0: idle, 1: dragging left, 2: pausing, 3: dragging back
+
+	function playDemo() {
+		if (isDemoPlaying) return;
+		isDemoPlaying = true;
+		demoPhase = 1;
+
+		// Find UNIDAD party
+		const unidadParty = partidosArr.find(p => p.id === 'UNI');
+		if (!unidadParty) {
+			isDemoPlaying = false;
+			return;
+		}
+
+		const originalVotes = unidadParty.votos;
+		const baseVotes = unidadParty.baseVotos || originalVotes;
+		const demoAmount = 300000; // Transfer amount for demo
+
+		// Phase 1: Drag left (transfer to LIBRE)
+		setTimeout(() => {
+			const newVotes = Math.max(0, originalVotes - demoAmount);
+			const actualDelta = originalVotes - newVotes;
+
+			partidos.update(arr => {
+				const next = arr.map(p => ({ ...p }));
+				const unidadIdx = next.findIndex(p => p.id === 'UNI');
+				if (unidadIdx !== -1) {
+					next[unidadIdx].votos = newVotes;
+
+					// Register redistribution properly
+					registrarRedistribucion('UNI', baseVotes, -actualDelta);
+
+					// Transfer to LIBRE (destination B)
+					const idxB = next.findIndex(p => p.id === 'LIB');
+					if (idxB !== -1) {
+						next[idxB].votos += actualDelta;
+					}
+				}
+				return next;
+			});
+			recomputeAll();
+			demoPhase = 2;
+		}, 1000);
+
+		// Phase 2: Pause
+		setTimeout(() => {
+			demoPhase = 3;
+		}, 4000);
+
+		// Phase 3: Drag back (restore)
+		setTimeout(() => {
+			const newVotes = originalVotes;
+			const currentVotes = partidosArr.find(p => p.id === 'UNI')?.votos || 0;
+			const actualDelta = newVotes - currentVotes;
+
+			partidos.update(arr => {
+				const next = arr.map(p => ({ ...p }));
+				const unidadIdx = next.findIndex(p => p.id === 'UNI');
+				if (unidadIdx !== -1) {
+					next[unidadIdx].votos = originalVotes;
+
+					// Register redistribution properly (recovering votes)
+					registrarRedistribucion('UNI', baseVotes, actualDelta);
+
+					// Remove from LIBRE
+					const idxB = next.findIndex(p => p.id === 'LIB');
+					if (idxB !== -1) {
+						next[idxB].votos -= actualDelta;
+					}
+				}
+				return next;
+			});
+			recomputeAll();
+		}, 5000);
+
+		// Phase 4: Complete
+		setTimeout(() => {
+			isDemoPlaying = false;
+			demoPhase = 0;
+		}, 8000);
+	}
 </script>
 
 <section class="w-full">
@@ -276,6 +361,7 @@
 	>
 		<!-- Botones en esquina superior (desktop) o bottom fixed (mobile) -->
 		<div class="absolute top-2 right-2 z-20 hidden items-center gap-2 sm:flex">
+			<DragDemo on:play={playDemo} />
 			<Help inline={true} />
 			<ResetButton />
 		</div>
@@ -285,6 +371,20 @@
 			<h3 class="text-base font-semibold text-gray-800 sm:text-lg">
 				Resultados por partido (1ª vuelta)
 			</h3>
+			<!-- Desktop instruction -->
+			<p class="hidden items-center justify-center gap-1.5 text-xs text-gray-500 lg:flex">
+				<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-gray-400">
+					<path d="M18 15l-6-6-6 6"/>
+				</svg>
+				Arrastra las barras para transferir votos
+				<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-gray-400">
+					<path d="M6 9l6 6 6-6"/>
+				</svg>
+			</p>
+			<!-- Mobile instruction -->
+			<p class="flex items-center justify-center gap-1.5 text-xs text-gray-500 lg:hidden">
+				Usa los controles arriba para transferir votos
+			</p>
 		</div>
 
 		<div class="relative" style="--label-w: {labelW};">
@@ -299,6 +399,21 @@
 					{/each}
 				</div>
 			</div>
+
+			<!-- Demo cursor overlay -->
+			{#if isDemoPlaying}
+				<div class="pointer-events-none absolute inset-0 z-50 flex items-center justify-center">
+					<div class="rounded-lg bg-gray-900/80 px-4 py-2 text-sm font-medium text-white shadow-lg backdrop-blur-sm">
+						{#if demoPhase === 1}
+							Arrastrando...
+						{:else if demoPhase === 2}
+							Viste cómo funciona?
+						{:else if demoPhase === 3}
+							Restaurando...
+						{/if}
+					</div>
+				</div>
+			{/if}
 
 			<!-- barras -->
 			<div class="relative z-10 space-y-2 sm:space-y-2.5">
