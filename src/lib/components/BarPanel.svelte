@@ -292,7 +292,7 @@
 		demoPhase = 1;
 
 		// Find UNIDAD party
-		const unidadParty = partidosArr.find(p => p.id === 'UNI');
+		const unidadParty = partidosArr.find((p) => p.id === 'UNI');
 		if (!unidadParty) {
 			isDemoPlaying = false;
 			return;
@@ -307,9 +307,9 @@
 			const newVotes = Math.max(0, originalVotes - demoAmount);
 			const actualDelta = originalVotes - newVotes;
 
-			partidos.update(arr => {
-				const next = arr.map(p => ({ ...p }));
-				const unidadIdx = next.findIndex(p => p.id === 'UNI');
+			partidos.update((arr) => {
+				const next = arr.map((p) => ({ ...p }));
+				const unidadIdx = next.findIndex((p) => p.id === 'UNI');
 				if (unidadIdx !== -1) {
 					next[unidadIdx].votos = newVotes;
 
@@ -317,7 +317,7 @@
 					registrarRedistribucion('UNI', baseVotes, -actualDelta);
 
 					// Transfer to LIBRE (destination B)
-					const idxB = next.findIndex(p => p.id === 'LIB');
+					const idxB = next.findIndex((p) => p.id === 'LIB');
 					if (idxB !== -1) {
 						next[idxB].votos += actualDelta;
 					}
@@ -336,12 +336,12 @@
 		// Phase 3: Drag back (restore)
 		setTimeout(() => {
 			const newVotes = originalVotes;
-			const currentVotes = partidosArr.find(p => p.id === 'UNI')?.votos || 0;
+			const currentVotes = partidosArr.find((p) => p.id === 'UNI')?.votos || 0;
 			const actualDelta = newVotes - currentVotes;
 
-			partidos.update(arr => {
-				const next = arr.map(p => ({ ...p }));
-				const unidadIdx = next.findIndex(p => p.id === 'UNI');
+			partidos.update((arr) => {
+				const next = arr.map((p) => ({ ...p }));
+				const unidadIdx = next.findIndex((p) => p.id === 'UNI');
 				if (unidadIdx !== -1) {
 					next[unidadIdx].votos = originalVotes;
 
@@ -349,7 +349,7 @@
 					registrarRedistribucion('UNI', baseVotes, actualDelta);
 
 					// Remove from LIBRE
-					const idxB = next.findIndex(p => p.id === 'LIB');
+					const idxB = next.findIndex((p) => p.id === 'LIB');
 					if (idxB !== -1) {
 						next[idxB].votos -= actualDelta;
 					}
@@ -396,7 +396,7 @@
 
 				<!-- Center: Title -->
 				<h3 class="flex-1 text-center text-base font-semibold text-gray-800">
-					Resultados por partido (1ª vuelta)
+					Resultados 1ª vuelta
 				</h3>
 
 				<!-- Right: Reset icon (no box) -->
@@ -415,16 +415,38 @@
 
 			<!-- Desktop title (centered) -->
 			<h3 class="hidden text-base font-semibold text-gray-800 sm:block sm:text-center sm:text-lg">
-				Resultados por partido (1ª vuelta)
+				Resultados 1ª vuelta
 			</h3>
 			<!-- Desktop instruction -->
 			<p class="hidden items-center justify-center gap-1.5 text-xs text-gray-500 lg:flex">
-				<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-gray-400">
-					<path d="M18 15l-6-6-6 6"/>
+				<svg
+					xmlns="http://www.w3.org/2000/svg"
+					width="14"
+					height="14"
+					viewBox="0 0 24 24"
+					fill="none"
+					stroke="currentColor"
+					stroke-width="2"
+					stroke-linecap="round"
+					stroke-linejoin="round"
+					class="text-gray-400"
+				>
+					<path d="M18 15l-6-6-6 6" />
 				</svg>
 				Arrastra las barras para transferir votos
-				<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-gray-400">
-					<path d="M6 9l6 6 6-6"/>
+				<svg
+					xmlns="http://www.w3.org/2000/svg"
+					width="14"
+					height="14"
+					viewBox="0 0 24 24"
+					fill="none"
+					stroke="currentColor"
+					stroke-width="2"
+					stroke-linecap="round"
+					stroke-linejoin="round"
+					class="text-gray-400"
+				>
+					<path d="M6 9l6 6 6-6" />
 				</svg>
 			</p>
 			<!-- Mobile instruction -->
@@ -449,7 +471,9 @@
 			<!-- Demo cursor overlay -->
 			{#if isDemoPlaying}
 				<div class="pointer-events-none absolute inset-0 z-50 flex items-center justify-center">
-					<div class="rounded-lg bg-gray-900/80 px-4 py-2 text-sm font-medium text-white shadow-lg backdrop-blur-sm">
+					<div
+						class="rounded-lg bg-gray-900/80 px-4 py-2 text-sm font-medium text-white shadow-lg backdrop-blur-sm"
+					>
 						{#if demoPhase === 1}
 							Arrastrando...
 						{:else if demoPhase === 2}

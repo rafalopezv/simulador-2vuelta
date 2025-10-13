@@ -44,9 +44,9 @@
 
 	<!-- Tooltip (desktop only) -->
 	<div
-		class="pointer-events-none absolute -top-10 left-1/2 -translate-x-1/2 rounded-md bg-gray-900
-		       px-2.5 py-1 text-xs font-medium whitespace-nowrap text-white opacity-0
-		       shadow-md transition group-hover:opacity-100 hidden sm:block"
+		class="pointer-events-none absolute -top-10 left-1/2 hidden -translate-x-1/2 rounded-md
+		       bg-gray-900 px-2.5 py-1 text-xs font-medium whitespace-nowrap text-white
+		       opacity-0 shadow-md transition group-hover:opacity-100 sm:block"
 	>
 		Cómo usar
 		<div
@@ -60,7 +60,7 @@
 	<div class="fixed inset-0 z-[70] flex" aria-modal="true" role="dialog">
 		<!-- Overlay -->
 		<button
-			class="absolute inset-0 bg-black/40 cursor-default"
+			class="absolute inset-0 cursor-default bg-black/40"
 			on:click={() => (open = false)}
 			transition:fade={{ duration: DUR_OVERLAY, easing: cubicOut }}
 			aria-label="Cerrar"
@@ -109,7 +109,7 @@
 			<!-- Contenido scrollable -->
 			<div class="flex-1 space-y-5 overflow-y-auto px-4 py-4 text-sm text-gray-700">
 				<section>
-					<h3 class="mb-1 text-[13px] font-semibold text-gray-900">Idea general</h3>
+					<h3 class="mb-1 text-[14px] font-semibold text-gray-900">Idea general</h3>
 					<p>
 						Arrastra las barras por partido de la primera vuelta para redistribuir votos. El
 						termómetro central refleja el total agregado.
@@ -117,18 +117,10 @@
 				</section>
 
 				<section>
-					<h3 class="mb-1 text-[13px] font-semibold text-gray-900">Destino</h3>
+					<h3 class="mb-1 text-[14px] font-semibold text-gray-900">Destino</h3>
 					<p>
 						Elige el <span class="font-medium">destino</span> (PDC o LIBRE) y el movimiento de votos
 						se aplicará allí. Si sube “Nulo”, se descuenta del destino.
-					</p>
-				</section>
-
-				<section>
-					<h3 class="mb-1 text-[13px] font-semibold text-gray-900">Ámbitos</h3>
-					<p>
-						Explora por <span class="font-medium">Exterior, Nacional, Departamentos</span> y
-						<span class="font-medium">Capitales</span>. Los cambios se agregan al total global.
 					</p>
 				</section>
 
@@ -163,9 +155,9 @@
 
 				<!-- Footer con autor -->
 				<section class="mt-6 border-t border-gray-200 pt-4">
-					<p class="text-[13px] text-gray-600">Autor:</p>
+					<p class="text-[13px] text-gray-600">Desarrollado por:</p>
 					<div class="mt-1 flex items-center gap-2 text-gray-700">
-						<span class="font-medium">Rafa Lopez</span><br />
+						<span class="font-medium">rafa lópez v.</span><br />
 						<a
 							href="mailto:lopezvalverde.rafael@gmail.com"
 							class="flex items-center gap-1 text-gray-600 transition hover:text-gray-900"

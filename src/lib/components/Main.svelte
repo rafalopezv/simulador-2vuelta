@@ -65,13 +65,12 @@
 		</div>
 	{/if}
 
-
 	<!-- Mobile Help Drawer -->
 	{#if showHelpDrawer}
 		<div class="fixed inset-0 z-[70] flex sm:hidden" aria-modal="true" role="dialog">
 			<!-- Overlay -->
 			<button
-				class="absolute inset-0 bg-black/40 cursor-default"
+				class="absolute inset-0 cursor-default bg-black/40"
 				on:click={() => (showHelpDrawer = false)}
 				aria-label="Cerrar"
 			></button>
@@ -83,7 +82,9 @@
 				class="relative ml-auto flex h-full w-full max-w-md flex-col bg-white shadow-xl ring-1 ring-gray-200 sm:max-w-sm"
 			>
 				<!-- Header fijo -->
-				<div class="flex flex-shrink-0 items-center justify-between border-b border-gray-200 px-4 py-3">
+				<div
+					class="flex flex-shrink-0 items-center justify-between border-b border-gray-200 px-4 py-3"
+				>
 					<h2 class="text-sm font-semibold text-gray-900">Cómo usar el simulador</h2>
 					<button
 						on:click={() => (showHelpDrawer = false)}
@@ -111,48 +112,63 @@
 				<!-- Contenido scrollable -->
 				<div class="flex-1 space-y-5 overflow-y-auto px-4 py-4 text-sm text-gray-700">
 					<section>
-						<h3 class="mb-1 text-[13px] font-semibold text-gray-900">Idea general</h3>
+						<h3 class="mb-1 text-[14px] font-semibold text-gray-900">Idea general</h3>
 						<p>
-							Usa los controles de + y - para redistribuir votos entre partidos. El termómetro central refleja el total agregado.
+							Usa los controles de + y - para redistribuir votos entre partidos. El termómetro
+							central refleja el total agregado.
 						</p>
 					</section>
 
 					<section>
-						<h3 class="mb-1 text-[13px] font-semibold text-gray-900">Destino</h3>
+						<h3 class="mb-1 text-[14px] font-semibold text-gray-900">Desde</h3>
 						<p>
-							Elige el <span class="font-medium">destino</span> (PDC o LIBRE) en el selector. Si reduces "Nulo", se suma al destino.
+							Elige el <span class="font-medium">origen</span> (todos los prtidos y el voto nulo) en
+							el selector.
 						</p>
 					</section>
 
 					<section>
-						<h3 class="mb-1 text-[13px] font-semibold text-gray-900">Supuestos y límites</h3>
+						<h3 class="mb-1 text-[14px] font-semibold text-gray-900">Hacia</h3>
+						<p>
+							Elige el <span class="font-medium">destino</span> (PDC o LIBRE) en el selector. Si reduces
+							"Nulo", se suma al destino.
+						</p>
+					</section>
+
+					<section>
+						<h3 class="mb-1 text-[14px] font-semibold text-gray-900">Supuestos y límites</h3>
 						<ul class="list-inside list-disc space-y-1 text-gray-700">
 							<li>
 								<span class="font-medium">Blanco:</span> no varía, pues históricamente ha sido muy estable.
 							</li>
 							<li>
-								<span class="font-medium">Nulo:</span> no puede subir; se asume que tenderá a reducirse por la declaración de Evo que sugiere liberación del voto nulo.
+								<span class="font-medium">Nulo:</span> no puede subir; se asume que tenderá a reducirse
+								por la declaración de Evo que sugiere liberación del voto nulo.
 							</li>
 							<li>
-								<span class="font-medium">Nulo (mínimo):</span> se fijó en el promedio de elecciones nacionales como límite inferior.
+								<span class="font-medium">Nulo (mínimo):</span> se fijó en el promedio de elecciones
+								nacionales como límite inferior.
 							</li>
 							<li>
-								<span class="font-medium">Padrón electoral:</span> se mantiene fijo; el TSE indicó que se usará el mismo de la primera vuelta.
+								<span class="font-medium">Padrón electoral:</span> se mantiene fijo; el TSE indicó que
+								se usará el mismo de la primera vuelta.
 							</li>
 							<li>
-								<span class="font-medium">Participación:</span> se conserva igual; es decir, el número de votos emitidos totales permanece constante.
+								<span class="font-medium">Participación:</span> se conserva igual; es decir, el número
+								de votos emitidos totales permanece constante.
 							</li>
 							<li>
-								<span class="font-medium">Variable:</span> únicamente se puede modificar la distribución de los votos válidos.
+								<span class="font-medium">Variable:</span> únicamente se puede modificar la distribución
+								de los votos válidos.
 							</li>
 						</ul>
 					</section>
 
 					<!-- Footer con autor -->
 					<section class="mt-6 border-t border-gray-200 pt-4">
-						<p class="text-[13px] text-gray-600">Autor:</p>
+						<p class="text-[13px] text-gray-600">Desarrollado por:</p>
 						<div class="mt-1 flex items-center gap-2 text-gray-700">
-							<span class="font-medium">Rafa Lopez</span>
+							<span class="font-medium">rafa lópez v.</span>
 							<a
 								href="mailto:lopezvalverde.rafael@gmail.com"
 								class="flex items-center gap-1 text-gray-600 transition hover:text-gray-900"
