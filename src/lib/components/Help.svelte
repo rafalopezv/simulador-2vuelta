@@ -17,27 +17,13 @@
 	});
 
 	let btnRef;
-	let touchFired = false;
 
 	function onKeydown(e) {
 		if (e.key === 'Escape') open = false;
 	}
 
-	function openDrawer() {
-		if (touchFired) {
-			touchFired = false;
-			return;
-		}
-		open = true;
-		setTimeout(() => btnRef?.blur(), 150);
-	}
-
-	function handleTouch(e) {
-		e.preventDefault();
-		touchFired = true;
-		scale.set(0.85);
-		setTimeout(() => scale.set(1), 200);
-		open = true;
+	function toggleDrawer() {
+		open = !open;
 		setTimeout(() => btnRef?.blur(), 150);
 	}
 </script>
@@ -48,14 +34,9 @@
 <div class="group relative inline-block">
 	<button
 		bind:this={btnRef}
-		on:mousedown={() => scale.set(0.85)}
-		on:mouseup={() => scale.set(1)}
-		on:mouseleave={() => scale.set(1)}
-		on:touchend={handleTouch}
-		on:click={openDrawer}
+		on:click={toggleDrawer}
 		class="flex h-10 w-10 cursor-pointer items-center justify-center rounded-full border border-gray-200
-		       bg-white shadow-sm transition hover:bg-gray-50 focus:outline-none"
-		style="transform: scale({$scale});"
+		       bg-white shadow-sm transition hover:bg-gray-50 focus:outline-none active:scale-90"
 		aria-label="Ayuda"
 	>
 		<Info class="h-5 w-5 text-gray-700" />
