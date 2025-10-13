@@ -199,7 +199,7 @@
 				// For PDC/LIB finalists: allow reduction down to baseVotos (they can transfer to each other)
 				// For other parties: constrain to baseVotos
 				if (partyId === 'PDC' || partyId === 'LIB') {
-					finalVotos = Math.max(baseV, newV);
+					finalVotos = Math.max(0, newV);
 				} else {
 					finalVotos = Math.max(0, Math.min(newV, baseV));
 				}
