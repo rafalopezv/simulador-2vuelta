@@ -255,7 +255,7 @@
 			</button>
 
 			{#if showOriginDropdown}
-				<div class="absolute top-full left-0 right-0 z-50 mt-1 max-h-60 overflow-y-auto rounded-xl bg-white shadow-lg ring-1 ring-gray-200">
+				<div class="absolute bottom-full left-0 right-0 z-50 mb-1 max-h-60 overflow-y-auto rounded-xl bg-white shadow-lg ring-1 ring-gray-200">
 					{#each transferableParties as party}
 						<button
 							on:click={() => {
@@ -287,7 +287,7 @@
 			</button>
 
 			{#if showDestDropdown}
-				<div class="absolute top-full left-0 right-0 z-50 mt-1 rounded-xl bg-white shadow-lg ring-1 ring-gray-200">
+				<div class="absolute bottom-full left-0 right-0 z-50 mb-1 rounded-xl bg-white shadow-lg ring-1 ring-gray-200">
 					{#each destinationOptions as dest}
 						<button
 							on:click={() => {

@@ -2,17 +2,29 @@
 	import { tweened } from 'svelte/motion';
 	import { cubicOut } from 'svelte/easing';
 	import { spring } from 'svelte/motion';
-	import { Info } from 'lucide-svelte';
+	import { Info, RotateCcw } from 'lucide-svelte';
 	import ResetButton from '$lib/components/Reset.svelte';
 	import Help from '$lib/components/Help.svelte';
 	import DragDemo from '$lib/components/DragDemo.svelte';
+	import { resetAllStores } from '$lib/stores/nuevo';
+
+	export let onOpenHelp = () => {}; // Prop for opening help drawer
 
 	const infoScale = spring(1, {
 		stiffness: 0.2,
 		damping: 0.4
 	});
 
+	const resetScale = spring(1, {
+		stiffness: 0.2,
+		damping: 0.4
+	});
+
 	let infoBtnRef;
+
+	function handleReset() {
+		resetAllStores();
+	}
 
 	import {
 		partidos,
@@ -359,16 +371,50 @@
 	<div
 		class="relative min-h-[560px] rounded-xl border-gray-200 bg-white p-2 shadow-sm sm:p-3 md:min-h-[640px]"
 	>
-		<!-- Botones en esquina superior (desktop) o bottom fixed (mobile) -->
+		<!-- Desktop buttons in top-right corner -->
 		<div class="absolute top-2 right-2 z-20 hidden items-center gap-2 sm:flex">
-			<DragDemo on:play={playDemo} />
 			<Help inline={true} />
 			<ResetButton />
+			<DragDemo on:play={playDemo} />
 		</div>
 
-		<!-- Bloque de títulos coordinados -->
-		<div class="mb-4 space-y-1 text-center">
-			<h3 class="text-base font-semibold text-gray-800 sm:text-lg">
+		<!-- Title with flanking icons (mobile only) -->
+		<div class="mb-4 space-y-1">
+			<div class="flex items-center justify-between gap-2 sm:hidden">
+				<!-- Left: Help icon -->
+				<button
+					on:mousedown={() => infoScale.set(0.85)}
+					on:mouseup={() => infoScale.set(1)}
+					on:mouseleave={() => infoScale.set(1)}
+					on:click={onOpenHelp}
+					class="flex h-8 w-8 items-center justify-center transition"
+					style="transform: scale({$infoScale});"
+					aria-label="Ayuda"
+				>
+					<Info class="h-5 w-5 text-gray-700" />
+				</button>
+
+				<!-- Center: Title -->
+				<h3 class="flex-1 text-center text-base font-semibold text-gray-800">
+					Resultados por partido (1ª vuelta)
+				</h3>
+
+				<!-- Right: Reset icon (no box) -->
+				<button
+					on:mousedown={() => resetScale.set(0.85)}
+					on:mouseup={() => resetScale.set(1)}
+					on:mouseleave={() => resetScale.set(1)}
+					on:click={handleReset}
+					class="flex h-8 w-8 items-center justify-center transition"
+					style="transform: scale({$resetScale});"
+					aria-label="Resetear"
+				>
+					<RotateCcw class="h-5 w-5 text-gray-700" />
+				</button>
+			</div>
+
+			<!-- Desktop title (centered) -->
+			<h3 class="hidden text-base font-semibold text-gray-800 sm:block sm:text-center sm:text-lg">
 				Resultados por partido (1ª vuelta)
 			</h3>
 			<!-- Desktop instruction -->
@@ -383,7 +429,7 @@
 			</p>
 			<!-- Mobile instruction -->
 			<p class="flex items-center justify-center gap-1.5 text-xs text-gray-500 lg:hidden">
-				Usa los controles arriba para transferir votos
+				Usa los controles abajo para transferir votos
 			</p>
 		</div>
 
@@ -416,7 +462,7 @@
 			{/if}
 
 			<!-- barras -->
-			<div class="relative z-10 space-y-2 sm:space-y-2.5">
+			<div class="relative z-10 space-y-1.5 sm:space-y-2.5">
 				{#each partidosWithDynamicMax as p, i}
 					<PartyBar
 						name={p.name}

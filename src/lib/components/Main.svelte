@@ -2,10 +2,9 @@
 	import HeaderTermometro from '$lib/components/HeaderTermometro.svelte';
 	import BarPanel from '$lib/components/BarPanel.svelte';
 	import SidebarPanel from '$lib/components/SideBarPanel.svelte';
-	import Reset from '$lib/components/Reset.svelte';
 	import MobileVoteControls from '$lib/components/MobileVoteControls.svelte';
 	import Help from '$lib/components/Help.svelte';
-	import { Info, Mail } from 'lucide-svelte';
+	import { Mail } from 'lucide-svelte';
 
 	let showDrawer = false;
 	let showHelpDrawer = false;
@@ -21,19 +20,19 @@
 				<HeaderTermometro />
 			</div>
 
-			<!-- Mobile vote controls with pressure sensitivity -->
-			<div class="mb-3">
-				<MobileVoteControls onOpenDrawer={() => (showDrawer = true)} />
-			</div>
-
 			<!-- Layout principal -->
 			<div
 				class="grid w-full grid-cols-1 gap-y-4
                  lg:grid-cols-[minmax(0,1fr)_320px] lg:items-center lg:gap-x-4 lg:gap-y-6"
 			>
 				<!-- Columna izquierda: gráfico -->
-				<div>
-					<BarPanel />
+				<div class="relative">
+					<BarPanel onOpenHelp={() => (showHelpDrawer = true)} />
+
+					<!-- Mobile vote controls at bottom of BarPanel (thumb zone) -->
+					<div class="mt-3 lg:hidden">
+						<MobileVoteControls onOpenDrawer={() => (showDrawer = true)} />
+					</div>
 				</div>
 
 				<!-- Columna derecha: sidebar (desktop) -->
@@ -66,22 +65,6 @@
 		</div>
 	{/if}
 
-	<!-- Mobile floating buttons at bottom with backdrop blur -->
-	<div class="pointer-events-none fixed bottom-4 right-4 z-50 flex items-center gap-2 sm:hidden">
-		<!-- Mobile-only Help button -->
-		<button
-			on:click={() => (showHelpDrawer = true)}
-			class="pointer-events-auto flex h-10 w-10 items-center justify-center rounded-full border border-gray-200 bg-white/80 shadow-lg backdrop-blur-md transition active:scale-90"
-			aria-label="Ayuda"
-		>
-			<Info class="h-5 w-5 text-gray-700" />
-		</button>
-
-		<!-- Reset button -->
-		<div class="pointer-events-auto rounded-xl bg-white/80 p-1.5 shadow-lg backdrop-blur-md">
-			<Reset />
-		</div>
-	</div>
 
 	<!-- Mobile Help Drawer -->
 	{#if showHelpDrawer}
