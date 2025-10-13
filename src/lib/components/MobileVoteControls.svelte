@@ -155,26 +155,29 @@
 		// Immediate first transfer
 		transferVotes(transferAmountA);
 
-		// Set up interval that accelerates
-		pressIntervalA = setInterval(() => {
-			transferVotes(transferAmountA);
+		// Recursive function that speeds up over time
+		function scheduleNextA() {
+			pressIntervalA = setTimeout(() => {
+				transferVotes(transferAmountA);
+				accelerationCounterA++;
 
-			// Accelerate every 3 transfers
-			accelerationCounterA++;
-			if (accelerationCounterA % 3 === 0 && pressSpeedA > MIN_SPEED) {
-				pressSpeedA = Math.max(MIN_SPEED, pressSpeedA - SPEED_DECREASE);
-				clearInterval(pressIntervalA);
-				pressIntervalA = setInterval(() => {
-					transferVotes(transferAmountA);
-				}, pressSpeedA);
-			}
-		}, pressSpeedA);
+				// Accelerate every 3 transfers
+				if (accelerationCounterA % 3 === 0 && pressSpeedA > MIN_SPEED) {
+					pressSpeedA = Math.max(MIN_SPEED, pressSpeedA - SPEED_DECREASE);
+				}
+
+				// Schedule next transfer with current speed
+				scheduleNextA();
+			}, pressSpeedA);
+		}
+
+		scheduleNextA();
 	}
 
 	function stopPressA() {
 		scaleA.set(1);
 		if (pressIntervalA) {
-			clearInterval(pressIntervalA);
+			clearTimeout(pressIntervalA);
 			pressIntervalA = null;
 		}
 		pressSpeedA = 100;
@@ -192,26 +195,29 @@
 		// Immediate first transfer
 		transferVotes(-transferAmountB);
 
-		// Set up interval that accelerates
-		pressIntervalB = setInterval(() => {
-			transferVotes(-transferAmountB);
+		// Recursive function that speeds up over time
+		function scheduleNextB() {
+			pressIntervalB = setTimeout(() => {
+				transferVotes(-transferAmountB);
+				accelerationCounterB++;
 
-			// Accelerate every 3 transfers
-			accelerationCounterB++;
-			if (accelerationCounterB % 3 === 0 && pressSpeedB > MIN_SPEED) {
-				pressSpeedB = Math.max(MIN_SPEED, pressSpeedB - SPEED_DECREASE);
-				clearInterval(pressIntervalB);
-				pressIntervalB = setInterval(() => {
-					transferVotes(-transferAmountB);
-				}, pressSpeedB);
-			}
-		}, pressSpeedB);
+				// Accelerate every 3 transfers
+				if (accelerationCounterB % 3 === 0 && pressSpeedB > MIN_SPEED) {
+					pressSpeedB = Math.max(MIN_SPEED, pressSpeedB - SPEED_DECREASE);
+				}
+
+				// Schedule next transfer with current speed
+				scheduleNextB();
+			}, pressSpeedB);
+		}
+
+		scheduleNextB();
 	}
 
 	function stopPressB() {
 		scaleB.set(1);
 		if (pressIntervalB) {
-			clearInterval(pressIntervalB);
+			clearTimeout(pressIntervalB);
 			pressIntervalB = null;
 		}
 		pressSpeedB = 100;
@@ -229,8 +235,8 @@
 	// Cleanup on destroy
 	import { onDestroy } from 'svelte';
 	onDestroy(() => {
-		if (pressIntervalA) clearInterval(pressIntervalA);
-		if (pressIntervalB) clearInterval(pressIntervalB);
+		if (pressIntervalA) clearTimeout(pressIntervalA);
+		if (pressIntervalB) clearTimeout(pressIntervalB);
 	});
 </script>
 
